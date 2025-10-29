@@ -44,9 +44,7 @@ export default function LoginForm() {
         toast.success("Connexion réussie !", {
         description: "Vous allez être redirigé vers le tableau de bord...",
         });
-        setTimeout(() => {
-          router.push("/dashboard"); // 👈 redirection après 1 seconde
-        }, 1000);
+        window.location.href = "/dashboard";
       } else {
         toast.error("Erreur de connexion",{
           description: "Email ou mot de passe incorrect",
