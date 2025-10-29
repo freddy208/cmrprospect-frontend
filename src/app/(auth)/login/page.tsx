@@ -10,7 +10,6 @@ import {
   Users, 
   Target, 
   BarChart3,
-  MapPin,
   Sparkles,
 } from "lucide-react";
 
