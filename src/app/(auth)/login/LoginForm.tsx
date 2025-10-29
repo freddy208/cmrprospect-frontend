@@ -44,7 +44,7 @@ export default function LoginForm() {
         toast.success("Connexion réussie !", {
         description: "Vous allez être redirigé vers le tableau de bord...",
         });
-        window.location.href = "/dashboard";
+        window.location.href = "/users";
       } else {
         toast.error("Erreur de connexion",{
           description: "Email ou mot de passe incorrect",

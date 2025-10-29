@@ -17,3 +17,10 @@ export const STATUS = {
   QUALIFIED: "Qualifié",
   CLOSED: "Clos",
 };
+
+export const USER_STATUS = {
+  ACTIVE: "Actif",
+  INACTIVE: "Inactif",
+  DELETED: "Supprimé",
+} as const;
+
