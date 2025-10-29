@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { Mail, Lock, Eye, EyeOff, Loader2, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -19,6 +21,8 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   
   const { login } = useAuth();
+  const router = useRouter();
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +44,9 @@ export default function LoginForm() {
         toast.success("Connexion réussie !", {
         description: "Vous allez être redirigé vers le tableau de bord...",
         });
+        setTimeout(() => {
+          router.push("/dashboard"); // 👈 redirection après 1 seconde
+        }, 1000);
       } else {
         toast.error("Erreur de connexion",{
           description: "Email ou mot de passe incorrect",
