@@ -105,7 +105,7 @@ export default function LoginForm() {
               </div>
             </div>
 
-            {/* Champ Mot de passe */}
+            {/* Champ Mot de passe utilisateur*/}
             <div className="space-y-2">
               <Label htmlFor="password" className="text-gray-700 font-medium">
                 Mot de passe
