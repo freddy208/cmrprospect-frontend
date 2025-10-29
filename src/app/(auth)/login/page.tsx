@@ -11,8 +11,7 @@ import {
   Target, 
   BarChart3,
   MapPin,
-  Globe,
-  Award,
+  Sparkles,
 } from "lucide-react";
 
 export default function LoginPage() {
@@ -61,12 +60,6 @@ export default function LoginPage() {
     },
   ];
 
-  const stats = [
-    { icon: <Globe className="w-8 h-8" />, value: "15+", label: "Pays couverts" },
-    { icon: <Users className="w-8 h-8" />, value: "500+", label: "Commerciaux actifs" },
-    { icon: <Award className="w-8 h-8" />, value: "98%", label: "Satisfaction" },
-  ];
-
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-white flex">
       {/* Section gauche - Visuel et informations */}
@@ -92,7 +85,7 @@ export default function LoginPage() {
           >
             <div className="flex items-center space-x-3 mb-12">
               <div className="w-12 h-12 bg-white/20 backdrop-blur-lg rounded-xl flex items-center justify-center">
-                <MapPin className="w-7 h-7 text-white" />
+                <Sparkles className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white">ProspectsHub</h1>
@@ -141,21 +134,6 @@ export default function LoginPage() {
           </motion.div>
         </div>
 
-        {/* Stats en bas */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.6 }}
-          className="relative z-10 flex justify-between items-center pt-8 border-t border-white/20"
-        >
-          {stats.map((stat, index) => (
-            <div key={index} className="text-center">
-              <div className="text-yellow-400 mb-2 flex justify-center">{stat.icon}</div>
-              <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
-              <div className="text-sm text-blue-100">{stat.label}</div>
-            </div>
-          ))}
-        </motion.div>
 
         {/* Illustration décorative SVG */}
         <motion.div
@@ -175,8 +153,8 @@ export default function LoginPage() {
       </motion.div>
 
       {/* Section droite - Formulaire de connexion */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
-        <div className="w-full max-w-md">
+      <div className="w-full lg:w-1/2 flex justify-center min-h-screen p-6 sm:p-12">
+        <div className="w-full max-w-md lg:max-w-lg xl:max-w-xl">
           {/* Logo mobile */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -186,7 +164,7 @@ export default function LoginPage() {
           >
             <div className="flex items-center justify-center space-x-3 mb-4">
               <div className="w-12 h-12 bg-linear-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
-                <MapPin className="w-7 h-7 text-white" />
+                <Sparkles className="w-6 h-6 text-white" />
               </div>
               <div className="text-left">
                 <h1 className="text-2xl font-bold text-gray-900">ProspectsHub</h1>
@@ -205,18 +183,6 @@ export default function LoginPage() {
             transition={{ delay: 0.8, duration: 0.6 }}
             className="mt-8 text-center"
           >
-            <p className="text-xs text-gray-500">
-              © 2025 kpf consulting. Plateforme sécurisée pour professionnels.
-            </p>
-            <div className="flex items-center justify-center space-x-4 mt-3">
-              <a href="#" className="text-xs text-gray-500 hover:text-blue-600 transition-colors">
-                Politique de confidentialité
-              </a>
-              <span className="text-gray-300">•</span>
-              <a href="#" className="text-xs text-gray-500 hover:text-blue-600 transition-colors">
-                Conditions d&apos;utilisation
-              </a>
-            </div>
           </motion.div>
         </div>
       </div>

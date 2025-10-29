@@ -771,7 +771,7 @@ export default function HomePage() {
             viewport={{ once: true }}
             transition={{ delay: 0.4 }}
           >
-            <Link href="/(auth)/login">
+            <Link href="/login">
               <Button
                 size="lg"
                 className="bg-white text-blue-600 hover:bg-gray-100 font-bold px-16 py-8 text-xl group shadow-2xl transition-all duration-300 hover:scale-110 hover:shadow-3xl"

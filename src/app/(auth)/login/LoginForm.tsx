@@ -69,7 +69,7 @@ export default function LoginForm() {
       transition={{ duration: 0.6 }}
       className="w-full"
     >
-      <Card className="border-gray-200 shadow-xl">
+      <Card className="w-full border-gray-200 shadow-sm">
         <CardHeader className="space-y-1 pb-6">
           <div className="flex items-center justify-center mb-4">
             <div className="w-12 h-12 bg-linear-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
@@ -77,7 +77,7 @@ export default function LoginForm() {
             </div>
           </div>
           <CardTitle className="text-3xl font-bold text-center text-gray-900">
-            Bienvenue sur CMR Prospect
+            Bienvenue sur ProspectsHub
           </CardTitle>
           <p className="text-center text-gray-600">
             Connectez-vous pour poursuivre vos activités commerciales
