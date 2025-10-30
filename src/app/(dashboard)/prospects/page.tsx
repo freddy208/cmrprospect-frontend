@@ -3,6 +3,7 @@
 // src/app/(dashboard)/prospects/page.tsx
 "use client";
 
+import { Suspense } from "react";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useProspects } from "@/hooks/useProspects";
@@ -19,7 +20,7 @@ import { ViewToggle } from "@/components/prospects/view-toggle";
 import { ProspectFilters } from "@/components/prospects/prospect-filters";
 import { PROSPECT_TYPE } from "@/lib/constants";
 
-export default function ProspectsPage() {
+function ProspectsPageContent() {
   const searchParams = useSearchParams();
   const initialType = (searchParams.get("type") as keyof typeof PROSPECT_TYPE) || "PARTICULIER";
   const [currentView, setCurrentView] = useState<"grid" | "table">("grid");
@@ -86,5 +87,14 @@ export default function ProspectsPage() {
         </TabsContent>
       </Tabs>
     </motion.div>
+  );
+}
+
+export default function ProspectsPage() {
+  return (
+    // Le fallback est ce qui est affiché pendant que le composant est "suspendu"
+    <Suspense fallback={<div>Chargement de la page...</div>}>
+      <ProspectsPageContent />
+    </Suspense>
   );
 }
