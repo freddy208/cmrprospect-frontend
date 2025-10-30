@@ -20,7 +20,7 @@ export default function LoginPage() {
   // Redirection automatique si l'utilisateur est déjà connecté
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      router.push("/users");
+      router.push("/dashboard");
     }
   }, [isAuthenticated, loading, router]);
 

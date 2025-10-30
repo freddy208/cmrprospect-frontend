@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/lib/api.ts
 import axios from "axios";
+import type { DashboardStats, DashboardFilter } from "@/types/dashboard";
 
 
 const api = axios.create({
@@ -86,5 +87,18 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export async function getDashboardStats(filter?: DashboardFilter) {
+  // L'intercepteur s'occupera d'ajouter le filtre à l'URL si nécessaire
+  const params = new URLSearchParams();
+  if (filter?.startDate) params.append('startDate', filter.startDate);
+  if (filter?.endDate) params.append('endDate', filter.endDate);
+
+  const queryString = params.toString();
+  const url = `/dashboard/stats${queryString ? `?${queryString}` : ''}`;
+
+ const response = await api.get<DashboardStats>(url); // <--- CETTE LIGNE EST CORRECTE
+  return response.data;
+}
 
 export default api;
