@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -10,10 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Plus, Download, X } from "lucide-react";
+import { Search, Plus, Download, X, Globe } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { IUserFilter } from "@/types/user";
-import { ROLES, ROLE_LABEL, USER_STATUS } from "@/lib/constants";
+import { ROLE_LABEL, USER_STATUS } from "@/lib/constants";
+import countries from "world-countries";
+import { Label } from "@radix-ui/react-label";
 
 interface UserFiltersProps {
   filters: IUserFilter;
@@ -28,6 +32,10 @@ export default function UserFilters({
 }: UserFiltersProps) {
   const router = useRouter();
   const [searchValue, setSearchValue] = useState(filters.search || "");
+  const formattedCountries = countries.map((country: { name: { common: any; }; cca2: any; }) => ({
+  name: country.name.common,
+  code: country.cca2,
+}));
 
   // Debounce search
   useEffect(() => {
@@ -104,23 +112,28 @@ export default function UserFilters({
         </Select>
 
         {/* Filtre par pays */}
-        <Select
-          value={filters.country || "all"}
-          onValueChange={handleCountryChange}
-        >
-          <SelectTrigger className="w-full lg:w-48 h-11 border-gray-300">
-            <SelectValue placeholder="Tous les pays" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous les pays</SelectItem>
-            <SelectItem value="CM">Cameroun</SelectItem>
-            <SelectItem value="CI">Côte d'Ivoire</SelectItem>
-            <SelectItem value="SN">Sénégal</SelectItem>
-            <SelectItem value="BJ">Bénin</SelectItem>
-            <SelectItem value="TG">Togo</SelectItem>
-            <SelectItem value="GH">Ghana</SelectItem>
-          </SelectContent>
-        </Select>
+        {/* Filtre par pays */}
+        <div className="space-y-2">
+          <Label htmlFor="country" className="flex items-center">
+            <Globe className="w-4 h-4 mr-2 text-gray-500" />
+            Pays *
+          </Label>
+          <Select
+            value={filters.country || ""}
+            onValueChange={handleCountryChange}
+          >
+            <SelectTrigger className="h-11 border-gray-300">
+              <SelectValue placeholder="Choisissez un pays" />
+            </SelectTrigger>
+            <SelectContent className="max-h-60 overflow-y-auto">
+              {formattedCountries.map((country) => (
+                <SelectItem key={country.code} value={country.name}>
+                  {country.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Filtre par statut */}
         <Select
