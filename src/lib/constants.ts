@@ -11,6 +11,16 @@ export const ROLE_LABEL: Record<string, string> = {
   SALES_OFFICER: "Sales Officer",
 };
 
+export const SERVICE_TYPE = {
+  SIMULATEUR: "Simulateur",
+  FORMATION:  "Formation",
+} as const;
+
+export const SERVICE_TYPE_LABEL: Record<string, string> = {
+  SIMULATEUR: "Simulateur",
+  FORMATION:  "Formation",
+};
+
 // --- CORRECTION CRUCIALE ---
 // Mettez à jour les statuts pour qu'ils correspondent exactement à l'enum Prisma
 export const PROSPECT_STATUS = {
@@ -28,6 +38,33 @@ export const PROSPECT_STATUS_LABEL: Record<string, string> = {
   CONVERTI: "Converti",
   PAS_SERIEUX: "Pas sérieux",
   PERDU: "Perdu",
+};
+export const PROSPECT_TYPE = {
+  PARTICULIER: "Particulier",
+  ENTREPRISE: "Entreprise",
+} as const;
+
+export const PROSPECT_TYPE_LABEL: Record<string, string> = {
+  PARTICULIER: "Particulier",
+  ENTREPRISE: "Entreprise",
+};
+
+export const LEAD_CHANNEL = {
+  WHATSAPP: "WhatsApp",
+  EMAIL: "Email",
+  SITE_INTERNET: "Site Internet",
+  VISITE_BUREAU: "Visite Bureau",
+  VISITE_TERRAIN: "Visite Terrain",
+  RECOMMANDATION: "Recommandation",
+} as const;
+
+export const LEAD_CHANNEL_LABEL: Record<string, string> = {
+  WHATSAPP: "WhatsApp",
+  EMAIL: "Email",
+  SITE_INTERNET: "Site Internet",
+  VISITE_BUREAU: "Visite Bureau",
+  VISITE_TERRAIN: "Visite Terrain",
+  RECOMMANDATION: "Recommandation",
 };
 
 export const USER_STATUS = {
