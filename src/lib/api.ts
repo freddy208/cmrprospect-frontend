@@ -151,26 +151,16 @@ export async function convertProspect(id: string) {
 // --- DONNÉES ASSOCIÉES ---
 
 export async function getInteractionsForProspect(prospectId: string) {
-  const response = await api.get(`/prospects/${prospectId}/interactions`);
+  // --- CORRECTION : Ajouter le type générique Interaction[] ---
+  // On dit à TypeScript que l'intercepteur va nous retourner un tableau direct.
+  const response = await api.get<Interaction[]>(`/prospects/${prospectId}/interactions`);
   return response.data;
 }
 
-// src/lib/api.ts
-
-// ... (gardez le reste du fichier)
-
-// src/lib/api.ts
-
-// ... (le reste du fichier est inchangé)
 
 export async function getCommentsForProspect(prospectId: string) {
-  // --- CORRECTION : Le type générique est maintenant Comment[] ---
-  // On dit à TypeScript que l'intercepteur va nous retourner un tableau direct.
   const response = await api.get<Comment[]>(`/prospects/${prospectId}/comments`);
   
-  // L'intercepteur s'est déjà chargé de déballer { data: [...] } en [...]
-  // response.data est donc déjà le tableau de commentaires.
-  // Le `?? []` est une bonne sécurité au cas où l'API retournerait null.
   return response.data ?? []; 
 }
 

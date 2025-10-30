@@ -6,13 +6,15 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useQuery } from "@tanstack/react-query";
+import type { Interaction } from "@/types/index"; // <-- Assurez-vous que le type est importé
 
 interface InteractionListProps {
   prospectId: string;
 }
 
 export function InteractionList({ prospectId }: InteractionListProps) {
-  const { data: interactions, isLoading, error } = useQuery({
+  // --- CORRECTION : Ajouter le type générique Interaction[] ---
+  const { data: interactions, isLoading, error } = useQuery<Interaction[]>({
     queryKey: ["interactions", prospectId],
     queryFn: () => getInteractionsForProspect(prospectId),
   });
@@ -22,7 +24,9 @@ export function InteractionList({ prospectId }: InteractionListProps) {
 
   return (
     <div className="space-y-4">
-      {interactions.map((interaction) => (
+      {/* interactions est maintenant correctement typé comme un tableau Interaction[] */}
+      {/* TypeScript sait donc que 'interaction' est de type Interaction */}
+      {interactions?.map((interaction) => (
         <div key={interaction.id} className="flex space-x-3">
           <Avatar className="h-8 w-8">
             <AvatarFallback>
