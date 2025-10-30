@@ -11,11 +11,23 @@ export const ROLE_LABEL: Record<string, string> = {
   SALES_OFFICER: "Sales Officer",
 };
 
-export const STATUS = {
-  NEW: "Nouveau",
-  CONTACTED: "Contacté",
-  QUALIFIED: "Qualifié",
-  CLOSED: "Clos",
+// --- CORRECTION CRUCIALE ---
+// Mettez à jour les statuts pour qu'ils correspondent exactement à l'enum Prisma
+export const PROSPECT_STATUS = {
+  NOUVEAU: "Nouveau",
+  QUALIFIE: "Qualifié",
+  CONVERTI: "Converti",
+  PAS_SERIEUX: "Pas sérieux",
+  PERDU: "Perdu",
+} as const;
+
+// Labels pour l'affichage dans l'UI (plus joliment)
+export const PROSPECT_STATUS_LABEL: Record<string, string> = {
+  NOUVEAU: "Nouveau",
+  QUALIFIE: "Qualifié",
+  CONVERTI: "Converti",
+  PAS_SERIEUX: "Pas sérieux",
+  PERDU: "Perdu",
 };
 
 export const USER_STATUS = {
@@ -23,4 +35,3 @@ export const USER_STATUS = {
   INACTIVE: "Inactif",
   DELETED: "Supprimé",
 } as const;
-
