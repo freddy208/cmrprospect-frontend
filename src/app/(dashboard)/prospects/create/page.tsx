@@ -77,14 +77,14 @@ export default function CreateProspectPage() {
             <span className="text-sm font-medium" style={{ color: "#171717" }}>
               Progression
             </span>
-            <span className="text-sm font-medium" style={{ color: "#FBBF24" }}>
+            <span className="text-sm font-medium" style={{ color: "#1D4ED8" }}>
               Étape 1 sur 1
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <motion.div
               className="h-2 rounded-full"
-              style={{ backgroundColor: "#1D4ED8" }}
+              style={{ backgroundColor: "#FBBF24" }}
               initial={{ width: 0 }}
               animate={{ width: "100%" }}
               transition={{ duration: 1, delay: 0.5 }}

@@ -65,7 +65,44 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
     }
   }, [prospectType, form]);
 
-  const handleFormSubmit = form.handleSubmit(onSubmitProp);
+  const handleFormSubmit = form.handleSubmit((data) => {
+    // Nettoyer les données avant de les envoyer
+    const cleanedData: CreateProspectData = {
+      type: data.type,
+      email: data.email,
+      phone: data.phone,
+      country: data.country,
+      leadChannel: data.leadChannel,
+      serviceType: data.serviceType,
+      assignedToId: data.assignedToId || undefined,
+      initialComment: data.initialComment || undefined,
+      whatsapp: data.whatsapp || undefined,
+    };
+
+    // Ajouter les champs spécifiques selon le type
+    if (data.type === "PARTICULIER") {
+      cleanedData.firstName = data.firstName;
+      cleanedData.lastName = data.lastName;
+    } else if (data.type === "ENTREPRISE") {
+      cleanedData.companyName = data.companyName;
+      cleanedData.contactFirstName = data.contactFirstName;
+      cleanedData.contactLastName = data.contactLastName;
+    }
+
+    // Valider que les champs obligatoires sont remplis
+    if (data.type === "PARTICULIER" && (!data.firstName || !data.lastName)) {
+      form.setError("firstName", { message: "Le prénom est obligatoire pour un particulier" });
+      form.setError("lastName", { message: "Le nom est obligatoire pour un particulier" });
+      return;
+    }
+
+    if (data.type === "ENTREPRISE" && !data.companyName) {
+      form.setError("companyName", { message: "Le nom de l'entreprise est obligatoire" });
+      return;
+    }
+
+    onSubmitProp(cleanedData);
+  });
 
   return (
     <motion.div
@@ -147,6 +184,7 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                   <FormField
                     control={form.control}
                     name="email"
+                    rules={{ required: "L'email est obligatoire" }}
                     render={({ field }) => (
                       <motion.div
                         whileFocus={{ scale: 1.02 }}
@@ -155,7 +193,7 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                         <FormItem>
                           <FormLabel className="flex items-center gap-2 text-gray-700">
                             <Mail className="h-4 w-4" />
-                            Email
+                            Email *
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -175,6 +213,7 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                   <FormField
                     control={form.control}
                     name="phone"
+                    rules={{ required: "Le téléphone est obligatoire" }}
                     render={({ field }) => (
                       <motion.div
                         whileFocus={{ scale: 1.02 }}
@@ -183,7 +222,7 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                         <FormItem>
                           <FormLabel className="flex items-center gap-2 text-gray-700">
                             <Phone className="h-4 w-4" />
-                            Téléphone
+                            Téléphone *
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -231,6 +270,7 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                   <FormField
                     control={form.control}
                     name="country"
+                    rules={{ required: "Le pays est obligatoire" }}
                     render={({ field }) => (
                       <motion.div
                         whileFocus={{ scale: 1.02 }}
@@ -239,7 +279,7 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                         <FormItem>
                           <FormLabel className="flex items-center gap-2 text-gray-700">
                             <Globe className="h-4 w-4" />
-                            Pays
+                            Pays *
                           </FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
@@ -286,6 +326,7 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                       <FormField
                         control={form.control}
                         name="firstName"
+                        rules={{ required: "Le prénom est obligatoire pour un particulier" }}
                         render={({ field }) => (
                           <motion.div
                             whileFocus={{ scale: 1.02 }}
@@ -294,7 +335,7 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                             <FormItem>
                               <FormLabel className="flex items-center gap-2 text-gray-700">
                                 <User className="h-4 w-4" />
-                                Prénom
+                                Prénom *
                               </FormLabel>
                               <FormControl>
                                 <Input
@@ -313,6 +354,7 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                       <FormField
                         control={form.control}
                         name="lastName"
+                        rules={{ required: "Le nom est obligatoire pour un particulier" }}
                         render={({ field }) => (
                           <motion.div
                             whileFocus={{ scale: 1.02 }}
@@ -321,7 +363,7 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                             <FormItem>
                               <FormLabel className="flex items-center gap-2 text-gray-700">
                                 <User className="h-4 w-4" />
-                                Nom
+                                Nom *
                               </FormLabel>
                               <FormControl>
                                 <Input
@@ -365,6 +407,7 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                       <FormField
                         control={form.control}
                         name="companyName"
+                        rules={{ required: "Le nom de l'entreprise est obligatoire" }}
                         render={({ field }) => (
                           <motion.div
                             whileFocus={{ scale: 1.02 }}
@@ -373,7 +416,7 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                             <FormItem>
                               <FormLabel className="flex items-center gap-2 text-gray-700">
                                 <Building className="h-4 w-4" />
-                                Nom de l&apos;entreprise
+                                Nom de l&apos;entreprise *
                               </FormLabel>
                               <FormControl>
                                 <Input
@@ -468,13 +511,14 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                   <FormField
                     control={form.control}
                     name="serviceType"
+                    rules={{ required: "Le type de service est obligatoire" }}
                     render={({ field }) => (
                       <motion.div
                         whileFocus={{ scale: 1.02 }}
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                       >
                         <FormItem>
-                          <FormLabel className="text-gray-700">Type de Service</FormLabel>
+                          <FormLabel className="text-gray-700">Type de Service *</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
@@ -497,13 +541,14 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                   <FormField
                     control={form.control}
                     name="leadChannel"
+                    rules={{ required: "Le canal d'acquisition est obligatoire" }}
                     render={({ field }) => (
                       <motion.div
                         whileFocus={{ scale: 1.02 }}
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                       >
                         <FormItem>
-                          <FormLabel className="text-gray-700">Canal d&apos;acquisition</FormLabel>
+                          <FormLabel className="text-gray-700">Canal d&apos;acquisition *</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
