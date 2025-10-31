@@ -145,9 +145,17 @@ export async function getProspect(id: string) {
   return response.data;
 }
 
+// Dans src/lib/api.ts, modifiez la fonction createProspect comme suit :
+
 export async function createProspect(data: CreateProspectData) {
-  const response = await api.post<Prospect>('/prospects', data);
-  return response.data;
+  try {
+    console.log("Données envoyées à l'API:", data);
+    const response = await api.post<Prospect>('/prospects', data);
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de la création du prospect:", error);
+    throw error;
+  }
 }
 
 export async function updateProspect(id: string, data: UpdateProspectData) {
