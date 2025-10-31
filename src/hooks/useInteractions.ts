@@ -4,12 +4,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "./useAuth";
-// src/hooks/useInteractions.ts
-
-// Importe les fonctions depuis l'API
 import { getInteractions, createInteraction, updateInteraction, deleteInteraction } from "@/lib/api";
-
-// Importe TOUS les types nécessaires depuis le fichier de types
 import { 
   Interaction, 
   InteractionFilter, 
@@ -17,10 +12,9 @@ import {
   UpdateInteractionData 
 } from "@/types/interaction";
 
-// ... le reste de votre fichier useInteractions.ts reste identique
 type UseInteractionsOptions = {
   initialFilter?: InteractionFilter;
-  autoFetch?: boolean; // Permet de désactiver le fetch automatique au montage
+  autoFetch?: boolean;
 };
 
 type UseInteractionsReturn = {
@@ -50,7 +44,17 @@ export function useInteractions({ initialFilter, autoFetch = true }: UseInteract
     setError(null);
     try {
       const data = await getInteractions(currentFilter);
-      setInteractions(data);
+      // S'assurer que chaque interaction a un utilisateur
+      const interactionsWithUser = data.map(interaction => ({
+        ...interaction,
+        user: interaction.user || {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+        }
+      }));
+      setInteractions(interactionsWithUser);
     } catch (err: any) {
       console.error("Erreur lors de la récupération des interactions:", err);
       setError(err?.response?.data?.message || "Une erreur est survenue.");
@@ -76,8 +80,18 @@ export function useInteractions({ initialFilter, autoFetch = true }: UseInteract
     if (!user) return null;
     try {
       const newInteraction = await createInteraction(data);
-      setInteractions(prev => [newInteraction, ...prev]);
-      return newInteraction;
+      // S'assurer que la nouvelle interaction a un utilisateur
+      const interactionWithUser = {
+        ...newInteraction,
+        user: newInteraction.user || {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+        }
+      };
+      setInteractions(prev => [interactionWithUser, ...prev]);
+      return interactionWithUser;
     } catch (err: any) {
       setError(err?.response?.data?.message || "Erreur lors de la création.");
       return null;
@@ -85,15 +99,30 @@ export function useInteractions({ initialFilter, autoFetch = true }: UseInteract
   }, [user]);
 
   const updateInteractionHandler = useCallback(async (id: string, data: UpdateInteractionData): Promise<Interaction | null> => {
+    if (!user) {
+      setError("Utilisateur non connecté");
+      return null;
+    }
+    
     try {
       const updatedInteraction = await updateInteraction(id, data);
-      setInteractions(prev => prev.map(i => i.id === id ? updatedInteraction : i));
-      return updatedInteraction;
+      // S'assurer que l'interaction mise à jour a un utilisateur
+      const interactionWithUser = {
+        ...updatedInteraction,
+        user: updatedInteraction.user || {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+        }
+      };
+      setInteractions(prev => prev.map(i => i.id === id ? interactionWithUser : i));
+      return interactionWithUser;
     } catch (err: any) {
       setError(err?.response?.data?.message || "Erreur lors de la mise à jour.");
       return null;
     }
-  }, []);
+  }, [user]);
 
   const deleteInteractionHandler = useCallback(async (id: string): Promise<boolean> => {
     try {
@@ -117,7 +146,6 @@ export function useInteractions({ initialFilter, autoFetch = true }: UseInteract
   };
 }
 
-// Hook spécialisé pour un prospect spécifique, plus simple à utiliser dans un composant de détail
 export function useInteractionsForProspect(prospectId: string) {
   return useInteractions({ initialFilter: { prospectId } });
 }

@@ -48,7 +48,11 @@ export function InteractionItem({ interaction, onEdit, onDelete }: InteractionIt
                 <div className="flex items-center gap-4 text-xs text-gray-500">
                   <div className="flex items-center gap-1">
                     <User className="h-3 w-3" />
-                    {interaction.user.firstName} {interaction.user.lastName}
+                    {interaction.user ? (
+                      `${interaction.user.firstName} ${interaction.user.lastName}`
+                    ) : (
+                      "Utilisateur inconnu"
+                    )}
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />

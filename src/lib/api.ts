@@ -15,6 +15,16 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
 });
+// src/lib/api.ts
+export async function getCurrentUser() {
+  try {
+    const response = await api.get('/auth/me');
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de la récupération de l'utilisateur:", error);
+    return null;
+  }
+}
 
 // Helper pour unwrap les réponses transformées par l'interceptor backend
 function unwrapResponse(resp: any) {
@@ -231,9 +241,22 @@ export async function getInteractions(filter?: InteractionFilter) {
   return response.data;
 }
 
+// src/lib/api.ts
 export async function createInteraction(data: CreateInteractionData) {
-  const response = await api.post<Interaction>('/interactions', data);
-  return response.data;
+  try {
+    const response = await api.post<Interaction>('/interactions', data);
+    // S'assurer que la réponse contient les informations de l'utilisateur
+    if (!response.data.user) {
+      // Récupérer les informations de l'utilisateur depuis le hook useAuth ou depuis une autre source
+      // et les ajouter à l'objet interaction
+      const user = await getCurrentUser(); // Vous devrez implémenter cette fonction
+      response.data.user = user;
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de la création de l'interaction:", error);
+    throw error;
+  }
 }
 
 export async function updateInteraction(id: string, data: UpdateInteractionData) {
