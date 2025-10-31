@@ -25,7 +25,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Prospects Particuliers", href: "/prospects/", icon: Users },
   { name: "Prospects Entreprises", href: "/prospects/entreprises", icon: Users2 },
-  { name: "Interactions", href: "/interactions", icon: MessageSquare },
+  { name: "Interactions", href: "/dashboard/interactions", icon: MessageSquare },
   { name: "Prospects Aboutis", href: "/prospects/aboutis", icon: CheckCircle },
   { name: "Équipes", href: "/equipes", icon: UserCheck },
   { name: "Formations", href: "/formations", icon: GraduationCap },
