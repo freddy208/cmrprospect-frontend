@@ -8,9 +8,10 @@ import { Prospect } from "@/types/prospect";
 interface ProspectGridProps {
   prospects: Prospect[];
   isLoading: boolean;
+  onDelete?: () => void; // Callback pour rafraîchir la liste après suppression
 }
 
-export function ProspectGrid({ prospects, isLoading }: ProspectGridProps) {
+export function ProspectGrid({ prospects, isLoading, onDelete }: ProspectGridProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -64,7 +65,7 @@ export function ProspectGrid({ prospects, isLoading }: ProspectGridProps) {
           transition={{ duration: 0.5, delay: index * 0.05 }}
           layout
         >
-          <ProspectCard prospect={prospect} />
+          <ProspectCard prospect={prospect} onDelete={onDelete} />
         </motion.div>
       ))}
     </motion.div>

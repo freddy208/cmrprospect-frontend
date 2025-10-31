@@ -22,13 +22,11 @@ export function useDashboard(initialFilter?: DashboardFilter): UseDashboardRetur
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // --- CORRECTION CRUCIALE ---
-  // On ajoute le type de retour explicite à la fonction async
   const fetchStats = useCallback(async (filter?: DashboardFilter): Promise<void> => {
     if (!user) {
       setError("Utilisateur non connecté");
       setIsLoading(false);
-      return; // return implicite de void, c'est ok
+      return;
     }
 
     setIsLoading(true);
@@ -50,15 +48,9 @@ export function useDashboard(initialFilter?: DashboardFilter): UseDashboardRetur
     fetchStats(initialFilter);
   }, [fetchStats, initialFilter]);
 
-// src/hooks/useDashboard.ts
+  const refetch = useCallback(async (filter?: DashboardFilter): Promise<void> => {
+    await fetchStats(filter);
+  }, [fetchStats]);
 
-// ... (le début du fichier est identique)
-
-// Fonction de rechargement manuel
-// --- CORRECTION CRUCIALE ---
-const refetch = useCallback(async (filter?: DashboardFilter): Promise<void> => {
-  await fetchStats(filter);
-}, [fetchStats]);
-
-return { stats, isLoading, error, refetch };
-} 
+  return { stats, isLoading, error, refetch };
+}

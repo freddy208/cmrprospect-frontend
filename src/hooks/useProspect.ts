@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/hooks/useProspect.ts
 "use client";
@@ -28,6 +27,13 @@ export function useProspect(id: string): UseProspectReturn {
       setIsLoading(false);
       return;
     }
+    
+    if (!id) {
+      setError("ID du prospect non fourni");
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -36,7 +42,7 @@ export function useProspect(id: string): UseProspectReturn {
       setProspect(data);
     } catch (err: any) {
       console.error(`Erreur lors de la récupération du prospect ${id}:`, err);
-      setError(err?.response?.data?.message || "Une erreur est survenue.");
+      setError(err?.response?.data?.message || "Une erreur est survenue lors du chargement du prospect.");
       setProspect(null);
     } finally {
       setIsLoading(false);
@@ -48,7 +54,11 @@ export function useProspect(id: string): UseProspectReturn {
   }, [fetchProspect]);
 
   const updateProspectData = useCallback(async (data: UpdateProspectData) => {
-    if (!prospect) return;
+    if (!prospect) {
+      setError("Aucun prospect à mettre à jour");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -57,11 +67,11 @@ export function useProspect(id: string): UseProspectReturn {
       setProspect(updatedProspect);
     } catch (err: any) {
       console.error(`Erreur lors de la mise à jour du prospect ${id}:`, err);
-      setError(err?.response?.data?.message || "Une erreur est survenue.");
+      setError(err?.response?.data?.message || "Une erreur est survenue lors de la mise à jour.");
     } finally {
       setIsLoading(false);
     }
-  }, [prospect]);
+  }, [prospect, id]);
 
   return { prospect, isLoading, error, update: updateProspectData, refetch: fetchProspect };
 }

@@ -10,6 +10,7 @@ export type DashboardFilter = {
 export type TopSalesOfficer = {
   id: string;
   firstName?: string | null;
+  role?: string;
   lastName?: string | null;
   prospectCount: number;
 };
@@ -31,8 +32,9 @@ export type TopCountryManager = {
 // Type pour les données groupées (ex: par pays, par statut)
 // --- CORRECTION CRUCIALE ---
 // On contraint T pour qu'il soit toujours un type de clé d'objet valide (string)
+// Type pour les données groupées (ex: par pays, par statut)
 export type GroupedData<T extends string = string> = {
-  [key in T]: number;
+  [key in T]: number | { _count: { id: number } }; // Permet les deux formats possibles
 };
 
 // --- Types pour les statistiques de chaque rôle ---

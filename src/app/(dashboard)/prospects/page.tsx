@@ -67,6 +67,11 @@ function ProspectsPageContent() {
     refetch();
   };
 
+  // Fonction pour rafraîchir la liste après suppression
+  const handleDeleteSuccess = () => {
+    refetch();
+  };
+
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -237,9 +242,9 @@ function ProspectsPageContent() {
       <Card className="shadow-sm">
         <CardContent className="p-6">
           {currentView === "grid" ? (
-            <ProspectGrid prospects={prospects} isLoading={isLoading} />
+            <ProspectGrid prospects={prospects} isLoading={isLoading} onDelete={handleDeleteSuccess} />
           ) : (
-            <ProspectTable prospects={prospects} isLoading={isLoading} />
+            <ProspectTable prospects={prospects} isLoading={isLoading} onDelete={handleDeleteSuccess} />
           )}
         </CardContent>
       </Card>
