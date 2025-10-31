@@ -1,7 +1,7 @@
 // src/components/prospects/interaction-list.tsx
 "use client";
 
-import { getInteractionsForProspect } from "@/lib/api";
+import { getInteractions } from "@/lib/api"; // Modification ici
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -18,7 +18,7 @@ interface InteractionListProps {
 export function InteractionList({ prospectId }: InteractionListProps) {
   const { data: interactions, isLoading, error } = useQuery<Interaction[]>({
     queryKey: ["interactions", prospectId],
-    queryFn: () => getInteractionsForProspect(prospectId),
+    queryFn: () => getInteractions({ prospectId }), // Modification ici
   });
 
   if (isLoading) {

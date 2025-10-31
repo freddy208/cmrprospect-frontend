@@ -3,7 +3,8 @@
 import axios from "axios";
 import type { DashboardStats, DashboardFilter } from "@/types/dashboard";
 import type { Prospect, ProspectFilter, CreateProspectData, UpdateProspectData } from "@/types/prospect";
-import type { Interaction, Comment } from "@/types/index" // On créera ces types plus tard
+import type { Comment } from "@/types/index" // On créera ces types plus tard
+import { CreateInteractionData, InteractionFilter, UpdateInteractionData, Interaction} from "@/types/interaction";
 
 
 
@@ -208,5 +209,62 @@ export async function addInteractionToProspect(prospectId: string, data: any) {
   const response = await api.post<Interaction>('/interactions', { ...data, prospectId });
   return response.data;
 }
+
+// src/lib/api.ts
+
+// ... (imports et configuration axios inchangés)
+
+// --- NOUVELLES FONCTIONS POUR LE MODULE INTERACTION ---
+
+export async function getInteractions(filter?: InteractionFilter) {
+  const params = new URLSearchParams();
+  if (filter) {
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+  }
+  const queryString = params.toString();
+  const url = `/interactions${queryString ? `?${queryString}` : ''}`;
+  const response = await api.get<Interaction[]>(url);
+  return response.data;
+}
+
+export async function createInteraction(data: CreateInteractionData) {
+  const response = await api.post<Interaction>('/interactions', data);
+  return response.data;
+}
+
+export async function updateInteraction(id: string, data: UpdateInteractionData) {
+  const response = await api.patch<Interaction>(`/interactions/${id}`, data);
+  return response.data;
+}
+
+export async function deleteInteraction(id: string) {
+  // Le backend fait un soft-delete, donc on peut s'attendre à une réponse 204 No Content ou un objet mis à jour.
+  const response = await api.delete(`/interactions/${id}`);
+  return response.data;
+}
+
+export async function getInteractionCountByProspect(prospectId: string) {
+  const response = await api.get<{ count: number }>(`/interactions/count/prospect/${prospectId}`);
+  return response.data.count; // L'API renvoie probablement un nombre, pas un objet
+}
+
+export async function getInteractionCountByUser(userId: string) {
+  const response = await api.get<{ count: number }>(`/interactions/count/user/${userId}`);
+  return response.data.count;
+}
+
+// --- ANCIENNES FONCTIONS À SUPPRIMER OU REMPLACER ---
+
+// La fonction getInteractionsForProspect est remplacée par getInteractions({ prospectId })
+// export async function getInteractionsForProspect(prospectId: string) { ... }
+
+// La fonction addInteractionToProspect est remplacée par createInteraction
+// export async function addInteractionToProspect(prospectId: string, data: any) { ... }
+
+// ... (le reste du fichier est inchangé)
 
 export default api;

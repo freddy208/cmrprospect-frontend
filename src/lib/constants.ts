@@ -50,12 +50,12 @@ export const PROSPECT_TYPE_LABEL: Record<string, string> = {
 };
 
 export const LEAD_CHANNEL = {
-  WHATSAPP: "WhatsApp",
-  EMAIL: "Email",
-  SITE_INTERNET: "Site Internet",
-  VISITE_BUREAU: "Visite Bureau",
-  VISITE_TERRAIN: "Visite Terrain",
-  RECOMMANDATION: "Recommandation",
+  WHATSAPP: "WHATSAPP",
+  EMAIL: "EMAIL",
+  SITE_INTERNET: "SITE_INTERNET",
+  VISITE_BUREAU: "VISITE_BUREAU",
+  VISITE_TERRAIN: "VISITE_TERRAIN",
+  RECOMMANDATION: "RECOMMANDATION",
 } as const;
 
 export const LEAD_CHANNEL_LABEL: Record<string, string> = {
@@ -67,8 +67,29 @@ export const LEAD_CHANNEL_LABEL: Record<string, string> = {
   RECOMMANDATION: "Recommandation",
 };
 
+export const INTERACTION_TYPE = {
+  APPEL_TELEPHONIQUE: "APPEL_TELEPHONIQUE",
+  EMAIL: "EMAIL",
+  VISITE: "VISITE",
+  REUNION: "REUNION",
+  SMS_WHATSAPP: "SMS_WHATSAPP",
+  AUTRE: "AUTRE",
+} as const;
+
+export const INTERACTION_TYPE_LABEL: Record<string, string> = {
+  APPEL_TELEPHONIQUE: "Appel téléphonique",
+  EMAIL: "E-mail",
+  VISITE: "Visite",
+  REUNION: "Réunion",
+  SMS_WHATSAPP: "SMS/WhatsApp",
+  AUTRE: "Autre",
+};
+
 export const USER_STATUS = {
   ACTIVE: "Actif",
   INACTIVE: "Inactif",
   DELETED: "Supprimé",
 } as const;
+
+// --- NOUVELLES CONSTANTES POUR LES INTERACTIONS ---
+

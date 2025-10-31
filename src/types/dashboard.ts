@@ -20,6 +20,7 @@ export type TopCountryManager = {
   id?: string | null;
   firstName?: string | null;
   lastName?: string | null;
+  countryName: string; // Nouveau champ
   country: string;
   prospectCount: number;
 };

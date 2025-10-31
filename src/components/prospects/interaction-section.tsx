@@ -5,9 +5,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MessageSquarePlus, Send, Phone, Calendar } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { addInteractionToProspect, getInteractionsForProspect } from "@/lib/api";
+import { createInteraction, getInteractions } from "@/lib/api";
 import { toast } from "sonner";
 import { InteractionList } from "./interaction-list";
 import { Separator } from "@/components/ui/separator";
@@ -15,13 +16,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
 
+// Définir les canaux autorisés
+const CHANNEL_OPTIONS = [
+  { value: "WHATSAPP", label: "WhatsApp" },
+  { value: "EMAIL", label: "Email" },
+  { value: "SITE_INTERNET", label: "Site internet" },
+  { value: "VISITE_BUREAU", label: "Visite au bureau" },
+  { value: "VISITE_TERRAIN", label: "Visite sur terrain" },
+  { value: "RECOMMANDATION", label: "Recommandation" },
+] as const;
+
 interface InteractionSectionProps {
   prospectId: string;
 }
 
+// Définir une interface pour typer notre état
+interface NewInteractionState {
+  notes: string;
+  channel: "WHATSAPP" | "EMAIL" | "SITE_INTERNET" | "VISITE_BUREAU" | "VISITE_TERRAIN" | "RECOMMANDATION";
+}
+
 export function InteractionSection({ prospectId }: InteractionSectionProps) {
   const { user } = useAuth();
-  const [newInteraction, setNewInteraction] = useState({ notes: "" });
+  const [newInteraction, setNewInteraction] = useState<NewInteractionState>({ 
+    notes: "", 
+    channel: "EMAIL" // Utiliser une valeur par défaut valide
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,8 +50,13 @@ export function InteractionSection({ prospectId }: InteractionSectionProps) {
 
     setIsSubmitting(true);
     try {
-      await addInteractionToProspect(prospectId, { notes: newInteraction.notes });
-      setNewInteraction({ notes: "" });
+      // Utilisation de createInteraction avec les bons paramètres
+      await createInteraction({
+        prospectId: prospectId,
+        notes: newInteraction.notes,
+        channel: newInteraction.channel,
+      });
+      setNewInteraction({ notes: "", channel: "EMAIL" }); // Réinitialiser avec la valeur par défaut
       toast.success("Interaction ajoutée !");
       // Forcer un rafraîchissement des interactions
       window.location.reload();
@@ -70,11 +95,28 @@ export function InteractionSection({ prospectId }: InteractionSectionProps) {
                   {user?.lastName?.charAt(0)}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1">
+              <div className="flex-1 space-y-3">
+                <div className="flex gap-2">
+                  <Select
+                    value={newInteraction.channel}
+                    onValueChange={(value) => setNewInteraction({ ...newInteraction, channel: value as NewInteractionState["channel"] })}
+                  >
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Canal" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CHANNEL_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Textarea
                   placeholder="Ajouter une note d'interaction..."
                   value={newInteraction.notes}
-                  onChange={(e) => setNewInteraction({ notes: e.target.value })}
+                  onChange={(e) => setNewInteraction({ ...newInteraction, notes: e.target.value })}
                   className="min-h-[100px] resize-none border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 />
                 <div className="flex justify-end mt-2">
