@@ -23,7 +23,7 @@ import { ROLE_LABEL } from "@/lib/constants";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Prospects Particuliers", href: "/prospects/particuliers", icon: Users },
+  { name: "Prospects Particuliers", href: "/prospects/", icon: Users },
   { name: "Prospects Entreprises", href: "/prospects/entreprises", icon: Users2 },
   { name: "Interactions", href: "/interactions", icon: MessageSquare },
   { name: "Prospects Aboutis", href: "/prospects/aboutis", icon: CheckCircle },
