@@ -115,6 +115,30 @@ export async function getProspects(filter?: ProspectFilter) {
   const response = await api.get<Prospect[]>(url);
   return response.data;
 }
+export async function getProspectsEntreprises(filter?: ProspectFilter) {
+  const params = new URLSearchParams();
+  if (filter) {
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value) params.append(key, String(value));
+    });
+  }
+  const queryString = params.toString();
+  const url = `/prospects/entreprises${queryString ? `?${queryString}` : ''}`;
+  const response = await api.get<Prospect[]>(url);
+  return response.data;
+}
+export async function getProspectsAboutis(filter?: ProspectFilter) {
+  const params = new URLSearchParams();
+  if (filter) {
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value) params.append(key, String(value));
+    });
+  }
+  const queryString = params.toString();
+  const url = `/prospects/aboutis${queryString ? `?${queryString}` : ''}`;
+  const response = await api.get<Prospect[]>(url);
+  return response.data;
+}
 
 export async function getProspect(id: string) {
   const response = await api.get<Prospect>(`/prospects/${id}`);

@@ -1,134 +1,259 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/app/(dashboard)/prospects/page.tsx
 "use client";
 
-import { Suspense } from "react";
-import { useState } from "react";
-import { useSearchParams, usePathname } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useProspects } from "@/hooks/useProspects";
 import { useAuth } from "@/hooks/useAuth";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Search, Filter, Download } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { ProspectGrid } from "@/components/prospects/prospect-grid";
 import { ProspectTable } from "@/components/prospects/prospect-table";
 import { ViewToggle } from "@/components/prospects/view-toggle";
 import { ProspectFilters } from "@/components/prospects/prospect-filters";
-import { PROSPECT_TYPE } from "@/lib/constants";
+import { PROSPECT_STATUS_LABEL, PROSPECT_TYPE_LABEL } from "@/lib/constants";
 
 function ProspectsPageContent() {
   const searchParams = useSearchParams();
-  const pathname = usePathname();
-
-  // --- CORRECTION : Logique généralisée pour déterminer le filtre et l'onglet actif ---
-  let initialFilter = {};
-  let activeTab = "PARTICULIER"; // Onglet par défaut
-
-  // On vérifie d'abord les URL "propres"
-  switch (pathname) {
-    case "/prospects/particuliers":
-      initialFilter = { type: "PARTICULIER" };
-      activeTab = "PARTICULIER";
-      break;
-    case "/prospects/entreprises":
-      initialFilter = { type: "ENTREPRISE" };
-      activeTab = "ENTREPRISE";
-      break;
-    case "/prospects/aboutis":
-      initialFilter = { status: "CONVERTI" };
-      activeTab = "CONVERTI";
-      break;
-    default:
-      // Cas par défaut : on utilise le paramètre ?type=... s'il existe
-      const typeFromUrl = (searchParams.get("type") as keyof typeof PROSPECT_TYPE) || "PARTICULIER";
-      initialFilter = { type: typeFromUrl };
-      activeTab = typeFromUrl;
-      break;
-  }
-
   const [currentView, setCurrentView] = useState<"grid" | "table">("grid");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({});
+  const [showFilters, setShowFilters] = useState(false);
   const { user } = useAuth();
 
-  const { prospects, isLoading, error, refetch } = useProspects(initialFilter);
+  // Utiliser un état local pour éviter les boucles infinies
+  const [prospectFilter, setProspectFilter] = useState({});
+  
+  // Ne charger les données que lorsque les filtres changent réellement
+  const { prospects, isLoading, error, refetch } = useProspects(prospectFilter);
+
+  // Mettre à jour les filtres de manière contrôlée
+  useEffect(() => {
+    const combinedFilters = {
+      ...filters,
+      ...(searchTerm && { search: searchTerm })
+    };
+    
+    // Vérifier si les filtres ont réellement changé avant de mettre à jour
+    if (JSON.stringify(combinedFilters) !== JSON.stringify(prospectFilter)) {
+      setProspectFilter(combinedFilters);
+    }
+  }, [filters, searchTerm, prospectFilter]);
+
+  const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
 
   const handleCreateSuccess = () => {
     toast.success("Prospect créé avec succès !");
     refetch();
   };
 
-  if (error) {
-    return <div>Erreur lors du chargement des prospects : {error}</div>;
-  }
+  // Fonction wrapper pour gérer le clic sur le bouton Réessayer
+  const handleRetryClick = () => {
+    refetch();
+  };
 
-  // --- ASTUCE : On extrait le contenu commun pour éviter la répétition ---
-  const prospectContent = (
-    <div className="flex flex-col lg:flex-row gap-4">
-      <div className="lg:w-64">
-        <ProspectFilters onFilterChange={function (filters: any): void {
-                        throw new Error("Function not implemented.");
-                    } } />
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-red-600">Erreur</CardTitle>
+            <CardDescription>
+              Une erreur est survenue lors du chargement des prospects
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600">{error}</p>
+            <Button onClick={handleRetryClick} className="mt-4 w-full">
+              Réessayer
+            </Button>
+          </CardContent>
+        </Card>
       </div>
-      <div className="flex-1 space-y-4">
-        <div className="flex justify-between items-center">
-          <ViewToggle view={currentView} onViewChange={setCurrentView} />
-        </div>
-        {currentView === "grid" ? (
-          <ProspectGrid prospects={prospects} isLoading={isLoading} />
-        ) : (
-          <ProspectTable prospects={prospects} isLoading={isLoading} />
-        )}
-      </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="space-y-4"
+      className="space-y-6"
+      style={{ backgroundColor: "#F9FAFB", minHeight: "100vh", padding: "1.5rem" }}
     >
-      {/* Header */}
-      <div className="flex justify-between items-center">
+      {/* Header avec style premium */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Prospects</h1>
-          <p className="text-muted-foreground">Gérez vos prospects et suivez leur progression.</p>
+          <h1 className="text-3xl font-bold tracking-tight" style={{ color: "#171717" }}>
+            Prospects
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Gérez tous vos prospects et suivez leur progression
+          </p>
         </div>
-        <Button onClick={() => window.location.href = `/prospects/create?type=${activeTab === "CONVERTI" ? "PARTICULIER" : activeTab}`}>
-          <Plus className="mr-2 h-4 w-4" /> Créer un Prospect
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            style={{ borderColor: "#1D4ED8", color: "#1D4ED8" }}
+          >
+            <Download className="h-4 w-4" />
+            Exporter
+          </Button>
+          <Button 
+            onClick={() => window.location.href = "/prospects/create"}
+            style={{ backgroundColor: "#1D4ED8" }}
+            className="text-white hover:bg-blue-700"
+          >
+            <Plus className="mr-2 h-4 w-4" /> 
+            Créer un Prospect
+          </Button>
+        </div>
       </div>
 
-      {/* Tabs for Prospect Type */}
-      <Tabs defaultValue={activeTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="PARTICULIER">Particuliers</TabsTrigger>
-          <TabsTrigger value="ENTREPRISE">Entreprises</TabsTrigger>
-          <TabsTrigger value="CONVERTI">Aboutis</TabsTrigger>
-        </TabsList>
+      {/* Statistiques */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Prospects</p>
+                <p className="text-2xl font-bold" style={{ color: "#1D4ED8" }}>
+                  {prospects?.length || 0}
+                </p>
+              </div>
+              <div className="p-2 rounded-full" style={{ backgroundColor: "#F9FAFB" }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "#1D4ED8" }}>
+                  <span className="text-white text-sm font-bold">P</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Nouveaux</p>
+                <p className="text-2xl font-bold" style={{ color: "#1D4ED8" }}>
+                  {prospects?.filter(p => p.status === 'NOUVEAU').length || 0}
+                </p>
+              </div>
+              <Badge className="bg-blue-100 text-blue-800">Nouveau</Badge>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Qualifiés</p>
+                <p className="text-2xl font-bold" style={{ color: "#1D4ED8" }}>
+                  {prospects?.filter(p => p.status === 'QUALIFIE').length || 0}
+                </p>
+              </div>
+              <Badge className="bg-green-100 text-green-800">Qualifié</Badge>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Convertis</p>
+                <p className="text-2xl font-bold" style={{ color: "#1D4ED8" }}>
+                  {prospects?.filter(p => p.status === 'CONVERTI').length || 0}
+                </p>
+              </div>
+              <Badge className="bg-yellow-100 text-yellow-800" style={{ backgroundColor: "#FBBF24", color: "#171717" }}>
+                Converti
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-        {/* On réutilise le même contenu pour tous les onglets */}
-        <TabsContent value="PARTICULIER" className="mt-6">
-          {prospectContent}
-        </TabsContent>
-        <TabsContent value="ENTREPRISE" className="mt-6">
-          {prospectContent}
-        </TabsContent>
-        <TabsContent value="CONVERTI" className="mt-6">
-          {prospectContent}
-        </TabsContent>
-      </Tabs>
+      {/* Barre de recherche et filtres */}
+      <Card className="shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Rechercher par nom, email, entreprise..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="pl-10"
+                style={{ borderColor: "#E5E7EB" }}
+              />
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2"
+              style={{ borderColor: "#1D4ED8", color: "#1D4ED8" }}
+            >
+              <Filter className="h-4 w-4" />
+              Filtres
+              {Object.values(filters).filter(Boolean).length > 0 && (
+                <span className="ml-1 rounded-full bg-blue-600 text-white text-xs px-2 py-0.5">
+                  {Object.values(filters).filter(Boolean).length}
+                </span>
+              )}
+            </Button>
+            <ViewToggle view={currentView} onViewChange={setCurrentView} />
+          </div>
+          
+          {showFilters && (
+            <div className="mt-4 pt-4 border-t">
+              <ProspectFilters onFilterChange={handleFilterChange} />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Contenu principal */}
+      <Card className="shadow-sm">
+        <CardContent className="p-6">
+          {currentView === "grid" ? (
+            <ProspectGrid prospects={prospects} isLoading={isLoading} />
+          ) : (
+            <ProspectTable prospects={prospects} isLoading={isLoading} />
+          )}
+        </CardContent>
+      </Card>
     </motion.div>
   );
 }
 
 export default function ProspectsPage() {
   return (
-    <Suspense fallback={<div>Chargement de la page...</div>}>
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-screen" style={{ backgroundColor: "#F9FAFB" }}>
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p className="mt-2 text-gray-600">Chargement des prospects...</p>
+        </div>
+      </div>
+    }>
       <ProspectsPageContent />
     </Suspense>
   );
