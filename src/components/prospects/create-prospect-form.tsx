@@ -2,8 +2,8 @@
 // src/components/prospects/create-prospect-form.tsx
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useState, useEffect } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -20,8 +20,8 @@ import { PROSPECT_TYPE, PROSPECT_TYPE_LABEL, SERVICE_TYPE_LABEL, LEAD_CHANNEL_LA
 import countries from "world-countries";
 import { CreateProspectData } from "@/types/prospect";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
-import { User, Mail, Phone, Globe, Briefcase, MessageSquare, Building, UserPlus } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { User, Mail, Phone, Globe, Briefcase, MessageSquare, Building, UserPlus, UserCheck, CreditCard, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface CreateProspectFormProps {
@@ -42,8 +42,28 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
       serviceType: "FORMATION",
       assignedToId: "",
       initialComment: "",
+      firstName: "",
+      lastName: "",
+      companyName: "",
+      contactFirstName: "",
+      contactLastName: "",
+      whatsapp: "",
     },
   });
+
+  // Watch for type changes to reset specific fields
+  const prospectType = useWatch({ control: form.control, name: "type" });
+  
+  useEffect(() => {
+    if (prospectType === "PARTICULIER") {
+      form.setValue("companyName", "");
+      form.setValue("contactFirstName", "");
+      form.setValue("contactLastName", "");
+    } else if (prospectType === "ENTREPRISE") {
+      form.setValue("firstName", "");
+      form.setValue("lastName", "");
+    }
+  }, [prospectType, form]);
 
   const handleFormSubmit = form.handleSubmit(onSubmitProp);
 
@@ -88,7 +108,9 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                                 className={cn(
                                   "flex-1 h-12",
                                   field.value === key
-                                    ? "bg-blue-600 text-white border-blue-600"
+                                    ? key === "PARTICULIER" 
+                                      ? "bg-indigo-600 text-white border-indigo-600" 
+                                      : "bg-emerald-600 text-white border-emerald-600"
                                     : "border-gray-300 text-gray-700 hover:border-blue-400"
                                 )}
                                 onClick={() => field.onChange(key)}
@@ -180,6 +202,34 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                   />
                   <FormField
                     control={form.control}
+                    name="whatsapp"
+                    render={({ field }) => (
+                      <motion.div
+                        whileFocus={{ scale: 1.02 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      >
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 text-gray-700">
+                            <Phone className="h-4 w-4" />
+                            WhatsApp (optionnel)
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="tel"
+                              placeholder="+225 555 1234"
+                              {...field}
+                              className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                              onFocus={() => setFocusedField("whatsapp")}
+                              onBlur={() => setFocusedField(null)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      </motion.div>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
                     name="country"
                     render={({ field }) => (
                       <motion.div
@@ -215,17 +265,202 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
             </Card>
           </motion.div>
 
-          {/* Additional Information Section */}
+          {/* Specific Information Section - Particulier */}
+          <AnimatePresence>
+            {prospectType === "PARTICULIER" && (
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -20, opacity: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <Card className="border-0 shadow-sm bg-white">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2" style={{ color: "#171717" }}>
+                      <UserCheck className="h-5 w-5" style={{ color: "#6366F1" }} />
+                      Informations personnelles
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField
+                        control={form.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <motion.div
+                            whileFocus={{ scale: 1.02 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          >
+                            <FormItem>
+                              <FormLabel className="flex items-center gap-2 text-gray-700">
+                                <User className="h-4 w-4" />
+                                Prénom
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Jean"
+                                  {...field}
+                                  className="h-12 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                  onFocus={() => setFocusedField("firstName")}
+                                  onBlur={() => setFocusedField(null)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          </motion.div>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <motion.div
+                            whileFocus={{ scale: 1.02 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          >
+                            <FormItem>
+                              <FormLabel className="flex items-center gap-2 text-gray-700">
+                                <User className="h-4 w-4" />
+                                Nom
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Dupont"
+                                  {...field}
+                                  className="h-12 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                  onFocus={() => setFocusedField("lastName")}
+                                  onBlur={() => setFocusedField(null)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          </motion.div>
+                        )}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Specific Information Section - Entreprise */}
+          <AnimatePresence>
+            {prospectType === "ENTREPRISE" && (
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -20, opacity: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <Card className="border-0 shadow-sm bg-white">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2" style={{ color: "#171717" }}>
+                      <Building className="h-5 w-5" style={{ color: "#10B981" }} />
+                      Informations de l&apos;entreprise
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField
+                        control={form.control}
+                        name="companyName"
+                        render={({ field }) => (
+                          <motion.div
+                            whileFocus={{ scale: 1.02 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          >
+                            <FormItem>
+                              <FormLabel className="flex items-center gap-2 text-gray-700">
+                                <Building className="h-4 w-4" />
+                                Nom de l&apos;entreprise
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Entreprise ABC"
+                                  {...field}
+                                  className="h-12 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
+                                  onFocus={() => setFocusedField("companyName")}
+                                  onBlur={() => setFocusedField(null)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          </motion.div>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="contactFirstName"
+                        render={({ field }) => (
+                          <motion.div
+                            whileFocus={{ scale: 1.02 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          >
+                            <FormItem>
+                              <FormLabel className="flex items-center gap-2 text-gray-700">
+                                <UserCheck className="h-4 w-4" />
+                                Prénom du contact
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Jean"
+                                  {...field}
+                                  className="h-12 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
+                                  onFocus={() => setFocusedField("contactFirstName")}
+                                  onBlur={() => setFocusedField(null)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          </motion.div>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="contactLastName"
+                        render={({ field }) => (
+                          <motion.div
+                            whileFocus={{ scale: 1.02 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          >
+                            <FormItem>
+                              <FormLabel className="flex items-center gap-2 text-gray-700">
+                                <UserCheck className="h-4 w-4" />
+                                Nom du contact
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Dupont"
+                                  {...field}
+                                  className="h-12 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
+                                  onFocus={() => setFocusedField("contactLastName")}
+                                  onBlur={() => setFocusedField(null)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          </motion.div>
+                        )}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Service Information Section */}
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
           >
             <Card className="border-0 shadow-sm bg-white">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2" style={{ color: "#171717" }}>
                   <Briefcase className="h-5 w-5" style={{ color: "#1D4ED8" }} />
-                  Informations supplémentaires
+                  Informations sur le service
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -323,7 +558,7 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
           >
             <Card className="border-0 shadow-sm bg-white">
               <CardHeader className="pb-3">
@@ -366,7 +601,7 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
             className="flex justify-end"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
           >
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button

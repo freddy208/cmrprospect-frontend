@@ -77,7 +77,7 @@ export default function CreateProspectPage() {
             <span className="text-sm font-medium" style={{ color: "#171717" }}>
               Progression
             </span>
-            <span className="text-sm font-medium" style={{ color: "#1D4ED8" }}>
+            <span className="text-sm font-medium" style={{ color: "#FBBF24" }}>
               Étape 1 sur 1
             </span>
           </div>
@@ -99,7 +99,7 @@ export default function CreateProspectPage() {
           transition={{ duration: 0.5, delay: 0.3 }}
         >
           <Card className="shadow-lg border-0 overflow-hidden">
-            <div className="h-2" style={{ backgroundColor: "#1D4ED8" }} />
+            <div className="h-2"  />
             <CardContent className="p-6 md:p-8">
               <CreateProspectForm onSubmit={handleCreate} isSubmitting={isPending} />
             </CardContent>
