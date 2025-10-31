@@ -6,6 +6,11 @@ import type { Prospect, ProspectFilter, CreateProspectData, UpdateProspectData }
 import { CreateInteractionData, InteractionFilter, UpdateInteractionData, Interaction} from "@/types/interaction";
 import { CreateCommentData, CommentFilter, UpdateCommentData, Comment } from "@/types/comment";
 
+import { CreateFormationData, FormationFilter, UpdateFormationData, Formation, FormationStatsByCountry, FormationProspectStats, FormationStatsByManager } from "@/types/formation";
+
+
+import { CreateSimulateurData, SimulateurFilter, UpdateSimulateurData, Simulateur, SimulateurStatsByCountry, SimulateurProspectStats, SimulateurStatsByManager } from "@/types/simulateur";
+
 
 
 const api = axios.create({
@@ -353,5 +358,152 @@ export async function getCommentCountByUser(userId: string) {
 // export async function addCommentToProspect(prospectId: string, content: string) { ... }
 
 // ... (le reste du fichier est inchangé)
+
+// src/lib/api.ts
+
+// ... (imports existants)
+
+// ... (code existant)
+
+// --- NOUVELLES FONCTIONS POUR LE MODULE FORMATION ---
+
+export async function getFormations(filter?: FormationFilter) {
+  const params = new URLSearchParams();
+  if (filter) {
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+  }
+  const queryString = params.toString();
+  const url = `/formations${queryString ? `?${queryString}` : ''}`;
+  const response = await api.get<Formation[]>(url);
+  return response.data;
+}
+
+export async function getFormation(id: string) {
+  const response = await api.get<Formation>(`/formations/${id}`);
+  return response.data;
+}
+
+export async function createFormation(data: CreateFormationData) {
+  try {
+    const response = await api.post<Formation>('/formations', data);
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de la création de la formation:", error);
+    throw error;
+  }
+}
+
+export async function updateFormation(id: string, data: UpdateFormationData) {
+  const response = await api.patch<Formation>(`/formations/${id}`, data);
+  return response.data;
+}
+
+export async function deleteFormation(id: string) {
+  // Le backend fait un soft-delete, donc on peut s'attendre à une réponse 204 No Content ou un objet mis à jour.
+  const response = await api.delete(`/formations/${id}`);
+  return response.data;
+}
+
+// --- FONCTIONS POUR LES STATISTIQUES ---
+
+export async function getFormationStatsByCountry() {
+  const response = await api.get<FormationStatsByCountry[]>('/formations/stats/by-country');
+  return response.data;
+}
+
+export async function getFormationStatsByManager() {
+  const response = await api.get<FormationStatsByManager[]>('/formations/stats/by-manager');
+  return response.data;
+}
+
+export async function getFormationTotalCount() {
+  const response = await api.get<{ count: number }>('/formations/stats/total');
+  return response.data.count;
+}
+
+export async function getFormationProspectStats() {
+  const response = await api.get<FormationProspectStats[]>('/formations/stats/prospects');
+  return response.data;
+}
+
+export async function getFormationProspectStatsByCountry(country: string) {
+  const response = await api.get<FormationProspectStats[]>(`/formations/stats/prospects/${country}`);
+  return response.data;
+}
+
+// --- NOUVELLES FONCTIONS POUR LE MODULE SIMULATEUR ---
+
+export async function getSimulateurs(filter?: SimulateurFilter) {
+  const params = new URLSearchParams();
+  if (filter) {
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+  }
+  const queryString = params.toString();
+  const url = `/simulateurs${queryString ? `?${queryString}` : ''}`;
+  const response = await api.get<Simulateur[]>(url);
+  return response.data;
+}
+
+export async function getSimulateur(id: string) {
+  const response = await api.get<Simulateur>(`/simulateurs/${id}`);
+  return response.data;
+}
+
+export async function createSimulateur(data: CreateSimulateurData) {
+  try {
+    const response = await api.post<Simulateur>('/simulateurs', data);
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de la création du simulateur:", error);
+    throw error;
+  }
+}
+
+export async function updateSimulateur(id: string, data: UpdateSimulateurData) {
+  const response = await api.patch<Simulateur>(`/simulateurs/${id}`, data);
+  return response.data;
+}
+
+export async function deleteSimulateur(id: string) {
+  // Le backend fait un soft-delete, donc on peut s'attendre à une réponse 204 No Content ou un objet mis à jour.
+  const response = await api.delete(`/simulateurs/${id}`);
+  return response.data;
+}
+
+// --- FONCTIONS POUR LES STATISTIQUES ---
+
+export async function getSimulateurStatsByCountry() {
+  const response = await api.get<SimulateurStatsByCountry[]>('/simulateurs/stats/by-country');
+  return response.data;
+}
+
+export async function getSimulateurStatsByManager() {
+  const response = await api.get<SimulateurStatsByManager[]>('/simulateurs/stats/by-manager');
+  return response.data;
+}
+
+export async function getSimulateurTotalCount() {
+  const response = await api.get<{ count: number }>('/simulateurs/stats/total');
+  return response.data.count;
+}
+
+export async function getSimulateurProspectStats() {
+  const response = await api.get<SimulateurProspectStats[]>('/simulateurs/stats/prospects');
+  return response.data;
+}
+
+export async function getSimulateurProspectStatsByCountry(country: string) {
+  const response = await api.get<SimulateurProspectStats[]>(`/simulateurs/stats/prospects/${country}`);
+  return response.data;
+}
+
 
 export default api;

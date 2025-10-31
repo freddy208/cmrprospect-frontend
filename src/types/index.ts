@@ -17,4 +17,27 @@ export type Interaction = {
 // src/types/index.ts
 
 // ... (imports existants)
+export type { 
+  Formation, 
+  CreateFormationData, 
+  UpdateFormationData, 
+  FormationFilter,
+  FormationStatsByCountry,
+  FormationStatsByManager,
+  FormationProspectStats
+} from './formation';
+
+// src/types/index.ts
+
+// ... (imports existants)
+export type { 
+  Simulateur, 
+  CreateSimulateurData, 
+  UpdateSimulateurData, 
+  SimulateurFilter,
+  SimulateurStatsByCountry,
+  SimulateurStatsByManager,
+  SimulateurProspectStats
+} from './simulateur';
+
 export type { Comment, CreateCommentData, UpdateCommentData, CommentFilter } from './comment';

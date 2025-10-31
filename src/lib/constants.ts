@@ -105,3 +105,26 @@ export const COMMENT_STATUS_LABEL: Record<string, string> = {
   DELETED: "Supprimé",
 };
 
+export const FORMATION_STATUS = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+  DELETED: "DELETED",
+} as const;
+
+export const FORMATION_STATUS_LABEL: Record<string, string> = {
+  ACTIVE: "Actif",
+  INACTIVE: "Inactif",
+  DELETED: "Supprimé",
+};
+
+export const SIMULATEUR_STATUS = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+  DELETED: "DELETED",
+} as const;
+
+export const SIMULATEUR_STATUS_LABEL: Record<string, string> = {
+  ACTIVE: "Actif",
+  INACTIVE: "Inactif",
+  DELETED: "Supprimé",
+};

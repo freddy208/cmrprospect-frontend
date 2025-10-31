@@ -192,11 +192,11 @@ export function ProspectDetailTabs({ prospect }: ProspectDetailTabsProps) {
                 <CardContent className="space-y-4">
                   <div className="flex justify-between">
                     <p className="text-sm font-medium">Commentaires</p>
-                    <p className="text-sm text-gray-600">{prospect._count.comments}</p>
+                    <p className="text-sm text-gray-600">{prospect._count?.comments || 0}</p>
                   </div>
                   <div className="flex justify-between">
                     <p className="text-sm font-medium">Interactions</p>
-                    <p className="text-sm text-gray-600">{prospect._count.interactions}</p>
+                    <p className="text-sm text-gray-600">{prospect._count?.interactions || 0}</p>
                   </div>
                 </CardContent>
               </Card>
