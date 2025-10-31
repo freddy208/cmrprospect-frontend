@@ -5,7 +5,7 @@
 
 import { Suspense } from "react";
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { useProspects } from "@/hooks/useProspects";
 import { useAuth } from "@/hooks/useAuth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,22 +22,68 @@ import { PROSPECT_TYPE } from "@/lib/constants";
 
 function ProspectsPageContent() {
   const searchParams = useSearchParams();
-  const initialType = (searchParams.get("type") as keyof typeof PROSPECT_TYPE) || "PARTICULIER";
+  const pathname = usePathname();
+
+  // --- CORRECTION : Logique généralisée pour déterminer le filtre et l'onglet actif ---
+  let initialFilter = {};
+  let activeTab = "PARTICULIER"; // Onglet par défaut
+
+  // On vérifie d'abord les URL "propres"
+  switch (pathname) {
+    case "/prospects/particuliers":
+      initialFilter = { type: "PARTICULIER" };
+      activeTab = "PARTICULIER";
+      break;
+    case "/prospects/entreprises":
+      initialFilter = { type: "ENTREPRISE" };
+      activeTab = "ENTREPRISE";
+      break;
+    case "/prospects/aboutis":
+      initialFilter = { status: "CONVERTI" };
+      activeTab = "CONVERTI";
+      break;
+    default:
+      // Cas par défaut : on utilise le paramètre ?type=... s'il existe
+      const typeFromUrl = (searchParams.get("type") as keyof typeof PROSPECT_TYPE) || "PARTICULIER";
+      initialFilter = { type: typeFromUrl };
+      activeTab = typeFromUrl;
+      break;
+  }
+
   const [currentView, setCurrentView] = useState<"grid" | "table">("grid");
   const { user } = useAuth();
 
-  // --- CORRECTION 1 : Récupérez toutes les données du hook ---
-  const { prospects, isLoading, error, refetch } = useProspects({ type: initialType });
+  const { prospects, isLoading, error, refetch } = useProspects(initialFilter);
 
   const handleCreateSuccess = () => {
     toast.success("Prospect créé avec succès !");
     refetch();
   };
 
-  // --- CORRECTION 2 (Optionnel mais recommandé) : Gérez l'état d'erreur ici ---
   if (error) {
     return <div>Erreur lors du chargement des prospects : {error}</div>;
   }
+
+  // --- ASTUCE : On extrait le contenu commun pour éviter la répétition ---
+  const prospectContent = (
+    <div className="flex flex-col lg:flex-row gap-4">
+      <div className="lg:w-64">
+        <ProspectFilters onFilterChange={function (filters: any): void {
+                        throw new Error("Function not implemented.");
+                    } } />
+      </div>
+      <div className="flex-1 space-y-4">
+        <div className="flex justify-between items-center">
+          <ViewToggle view={currentView} onViewChange={setCurrentView} />
+        </div>
+        {currentView === "grid" ? (
+          <ProspectGrid prospects={prospects} isLoading={isLoading} />
+        ) : (
+          <ProspectTable prospects={prospects} isLoading={isLoading} />
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <motion.div
@@ -52,38 +98,28 @@ function ProspectsPageContent() {
           <h1 className="text-3xl font-bold tracking-tight">Prospects</h1>
           <p className="text-muted-foreground">Gérez vos prospects et suivez leur progression.</p>
         </div>
-        <Button onClick={() => window.location.href = `/prospects/create?type=${initialType}`}>
+        <Button onClick={() => window.location.href = `/prospects/create?type=${activeTab === "CONVERTI" ? "PARTICULIER" : activeTab}`}>
           <Plus className="mr-2 h-4 w-4" /> Créer un Prospect
         </Button>
       </div>
 
       {/* Tabs for Prospect Type */}
-      <Tabs defaultValue={initialType} className="w-full">
+      <Tabs defaultValue={activeTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="PARTICULIER">Particuliers</TabsTrigger>
           <TabsTrigger value="ENTREPRISE">Entreprises</TabsTrigger>
           <TabsTrigger value="CONVERTI">Aboutis</TabsTrigger>
         </TabsList>
-        <TabsContent value={initialType} className="mt-6">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="lg:w-64">
-              <ProspectFilters onFilterChange={function (filters: any): void {
-                              throw new Error("Function not implemented.");
-                          } } />
-            </div>
-            <div className="flex-1 space-y-4">
-              <div className="flex justify-between items-center">
-                <ViewToggle view={currentView} onViewChange={setCurrentView} />
-              </div>
-              {currentView === "grid" ? (
-                // --- CORRECTION 3 : Passez les bonnes props ---
-                <ProspectGrid prospects={prospects} isLoading={isLoading} />
-              ) : (
-                // --- CORRECTION 4 : Faites de même pour ProspectTable ---
-                <ProspectTable prospects={prospects} isLoading={isLoading} />
-              )}
-            </div>
-          </div>
+
+        {/* On réutilise le même contenu pour tous les onglets */}
+        <TabsContent value="PARTICULIER" className="mt-6">
+          {prospectContent}
+        </TabsContent>
+        <TabsContent value="ENTREPRISE" className="mt-6">
+          {prospectContent}
+        </TabsContent>
+        <TabsContent value="CONVERTI" className="mt-6">
+          {prospectContent}
         </TabsContent>
       </Tabs>
     </motion.div>
@@ -92,7 +128,6 @@ function ProspectsPageContent() {
 
 export default function ProspectsPage() {
   return (
-    // Le fallback est ce qui est affiché pendant que le composant est "suspendu"
     <Suspense fallback={<div>Chargement de la page...</div>}>
       <ProspectsPageContent />
     </Suspense>

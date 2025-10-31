@@ -55,14 +55,19 @@ export function ProspectCard({ prospect }: ProspectCardProps) {
   );
 }
 
+// src/components/prospects/prospect-card.tsx
+
+// ... (le reste du fichier est inchangé)
+
 export function ProspectCardSkeleton() {
   return (
     <Card className="group hover:shadow-md transition-shadow duration-300">
       <CardHeader className="flex flex-row items-center justify-between space-x-4 p-4">
         <div className="flex items-center space-x-2">
-          <div className="h-10 w-10">
-            <AvatarFallback className="h-10 w-10" />
-          </div>
+          {/* --- CORRECTION : Envelopper AvatarFallback dans Avatar --- */}
+          <Avatar className="h-10 w-10">
+            <AvatarFallback className="h-10 w-10 bg-gray-200" /> {/* Ajout d'une couleur de fond pour le skeleton */}
+          </Avatar>
           <div className="flex-1 space-y-1">
             <div className="h-4 bg-gray-200 rounded w-20"></div>
             <div className="h-4 bg-gray-200 rounded w-24"></div>
