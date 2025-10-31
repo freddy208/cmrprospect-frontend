@@ -1,13 +1,19 @@
 // src/types/auth.ts
-export type UserRole = "DIRECTEUR_GENERAL" | "COUNTRY_MANAGER" | "SALES_OFFICER";
+import { Role } from "./role";
 
 export type AuthUser = {
   id: string;
   email: string;
   firstName?: string | null;
   lastName?: string | null;
-  role: UserRole;
+  roleId: string;
+  role: Role;
   country?: string | null;
+  isActive: boolean;
+  status: 'ACTIVE' | 'INACTIVE' | 'DELETED';
+  lastLogin?: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type LoginPayload = {

@@ -10,6 +10,11 @@ import { CreateFormationData, FormationFilter, UpdateFormationData, Formation, F
 
 
 import { CreateSimulateurData, SimulateurFilter, UpdateSimulateurData, Simulateur, SimulateurStatsByCountry, SimulateurProspectStats, SimulateurStatsByManager } from "@/types/simulateur";
+// Importations pour le module d'administration
+import { Role, RoleFilter, CreateRoleData, UpdateRoleData } from "@/types/role";
+import { Permission, PermissionFilter } from "@/types/permission";
+
+import { User, UserFilter, CreateUserData, UpdateUserData } from "@/types/user";
 
 
 
@@ -550,6 +555,116 @@ export async function getSimulateurProspectStats() {
 
 export async function getSimulateurProspectStatsByCountry(country: string) {
   const response = await api.get<SimulateurProspectStats[]>(`/simulateurs/stats/prospects/${country}`);
+  return response.data;
+}
+
+//NOUVELLES FONCTIONS POUR LE MODULE D'ADMINISTRATION ---
+
+// Fonctions pour les rôles
+export async function getRoles(filter?: RoleFilter) {
+  const params = new URLSearchParams();
+  if (filter) {
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+  }
+  const queryString = params.toString();
+  const url = `/administration/roles${queryString ? `?${queryString}` : ''}`;
+  const response = await api.get<Role[]>(url);
+  return response.data;
+}
+
+export async function getRole(id: string) {
+  const response = await api.get<Role>(`/administration/roles/${id}`);
+  return response.data;
+}
+
+export async function createRole(data: CreateRoleData) {
+  try {
+    const response = await api.post<Role>('/administration/roles', data);
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de la création du rôle:", error);
+    throw error;
+  }
+}
+
+export async function updateRole(id: string, data: UpdateRoleData) {
+  const response = await api.patch<Role>(`/administration/roles/${id}`, data);
+  return response.data;
+}
+
+export async function deleteRole(id: string) {
+  const response = await api.delete(`/administration/roles/${id}`);
+  return response.data;
+}
+
+// Fonctions pour les permissions
+export async function getPermissions(filter?: PermissionFilter) {
+  const params = new URLSearchParams();
+  if (filter) {
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+  }
+  const queryString = params.toString();
+  const url = `/administration/permissions${queryString ? `?${queryString}` : ''}`;
+  const response = await api.get<Permission[]>(url);
+  return response.data;
+}
+
+// Fonctions pour les utilisateurs
+export async function getUsers(filter?: UserFilter) {
+  const params = new URLSearchParams();
+  if (filter) {
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+  }
+  const queryString = params.toString();
+  const url = `/administration/users${queryString ? `?${queryString}` : ''}`;
+  const response = await api.get<User[]>(url);
+  return response.data;
+}
+
+export async function getUser(id: string) {
+  const response = await api.get<User>(`/administration/users/${id}`);
+  return response.data;
+}
+
+export async function createUser(data: CreateUserData) {
+  try {
+    const response = await api.post<User>('/administration/users', data);
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de la création de l'utilisateur:", error);
+    throw error;
+  }
+}
+
+export async function updateUser(id: string, data: UpdateUserData) {
+  const response = await api.patch<User>(`/administration/users/${id}`, data);
+  return response.data;
+}
+
+export async function deleteUser(id: string) {
+  const response = await api.delete(`/administration/users/${id}`);
+  return response.data;
+}
+
+export async function resetUserPassword(id: string) {
+  const response = await api.post(`/administration/users/${id}/reset-password`);
+  return response.data;
+}
+
+export async function toggleUserStatus(id: string) {
+  const response = await api.patch(`/administration/users/${id}/toggle-status`);
   return response.data;
 }
 

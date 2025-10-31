@@ -32,7 +32,7 @@ const navigation = [
   { name: "Équipes", href: "/equipes", icon: UserCheck },
   { name: "Formations", href: "/formations", icon: GraduationCap },
   { name: "Simulateur", href: "/simulateurs", icon: Calculator },
-  { name: "Gestion des droits", href: "/admin", icon: Shield },
+  { name: "Gestion des droits", href: "/administration", icon: Shield },
 ];
 
 export function Sidebar() {
@@ -47,7 +47,7 @@ export function Sidebar() {
         {!isCollapsed && (
           <div className="text-center">
             <p className="text-lg font-semibold">{user?.firstName} {user?.lastName}</p>
-            <p className="text-xs text-blue-200">Bienvenue, {ROLE_LABEL[user?.role as keyof typeof ROLE_LABEL]}</p>
+            <p className="text-xs text-blue-200">Bienvenue, {ROLE_LABEL[user?.role as unknown as keyof typeof ROLE_LABEL]}</p>
           </div>
         )}
       </div>
