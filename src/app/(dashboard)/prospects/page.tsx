@@ -88,6 +88,9 @@ function ProspectsPageContent() {
     );
   }
 
+  // Compter les filtres actifs (en excluant les valeurs undefined)
+  const activeFilterCount = Object.values(filters).filter(v => v !== undefined).length;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -103,7 +106,7 @@ function ProspectsPageContent() {
             Prospects
           </h1>
           <p className="text-muted-foreground mt-1">
-            Gérez tous vos prospects et suivez leur progression
+            Gérez tous vos prospects particuliers et suivez leur progression
           </p>
         </div>
         <div className="flex gap-2">
@@ -213,9 +216,9 @@ function ProspectsPageContent() {
             >
               <Filter className="h-4 w-4" />
               Filtres
-              {Object.values(filters).filter(Boolean).length > 0 && (
+              {activeFilterCount > 0 && (
                 <span className="ml-1 rounded-full bg-blue-600 text-white text-xs px-2 py-0.5">
-                  {Object.values(filters).filter(Boolean).length}
+                  {activeFilterCount}
                 </span>
               )}
             </Button>

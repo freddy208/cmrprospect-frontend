@@ -26,34 +26,54 @@ interface ProspectFiltersProps {
   onFilterChange: (filters: any) => void;
 }
 
+// Définir un type pour l'état des filtres pour plus de clarté
+type FilterState = {
+  status: string;
+  type: string;
+  serviceType: string;
+  leadChannel: string;
+  assignedToId: string;
+};
+
 export function ProspectFilters({ onFilterChange }: ProspectFiltersProps) {
-  const [filters, setFilters] = useState({
-    status: "",
-    type: "",
-    serviceType: "",
-    leadChannel: "",
-    assignedToId: "",
+  const [filters, setFilters] = useState<FilterState>({
+    status: "all",
+    type: "all",
+    serviceType: "all",
+    leadChannel: "all",
+    assignedToId: "all",
   });
 
-  const handleFilterChange = (key: string, value: string) => {
+  const handleFilterChange = (key: keyof FilterState, value: string) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
-    onFilterChange(newFilters);
+    
+    // SOLUTION : Créer un objet avec uniquement les filtres actifs (différents de "all")
+    // On utilise `reduce` pour construire un nouvel objet propre
+    const activeFilters = (Object.keys(newFilters) as Array<keyof FilterState>).reduce((acc, k) => {
+      // Si la valeur n'est pas "all", on l'ajoute à l'accumulateur
+      if (newFilters[k] !== "all") {
+        acc[k] = newFilters[k];
+      }
+      return acc;
+    }, {} as Partial<FilterState>); // `Partial` rend toutes les propriétés de FilterState optionnelles
+    
+    onFilterChange(activeFilters);
   };
 
   const clearFilters = () => {
-    const emptyFilters = {
-      status: "",
-      type: "",
-      serviceType: "",
-      leadChannel: "",
-      assignedToId: "",
+    const emptyFilters: FilterState = {
+      status: "all",
+      type: "all",
+      serviceType: "all",
+      leadChannel: "all",
+      assignedToId: "all",
     };
     setFilters(emptyFilters);
-    onFilterChange(emptyFilters);
+    onFilterChange({}); // On passe un objet vide pour réinitialiser tous les filtres
   };
 
-  const activeFilterCount = Object.values(filters).filter(Boolean).length;
+  const activeFilterCount = Object.values(filters).filter(v => v !== "all").length;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -65,7 +85,7 @@ export function ProspectFilters({ onFilterChange }: ProspectFiltersProps) {
             <SelectValue placeholder="Tous les statuts" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Tous les statuts</SelectItem>
+            <SelectItem value="all">Tous les statuts</SelectItem>
             {Object.entries(PROSPECT_STATUS_LABEL).map(([key, label]) => (
               <SelectItem key={key} value={key}>
                 {label}
@@ -83,7 +103,7 @@ export function ProspectFilters({ onFilterChange }: ProspectFiltersProps) {
             <SelectValue placeholder="Tous les types" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Tous les types</SelectItem>
+            <SelectItem value="all">Tous les types</SelectItem>
             {Object.entries(PROSPECT_TYPE_LABEL).map(([key, label]) => (
               <SelectItem key={key} value={key}>
                 {label}
@@ -101,7 +121,7 @@ export function ProspectFilters({ onFilterChange }: ProspectFiltersProps) {
             <SelectValue placeholder="Tous les types" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Tous les types</SelectItem>
+            <SelectItem value="all">Tous les types</SelectItem>
             {Object.entries(SERVICE_TYPE_LABEL).map(([key, label]) => (
               <SelectItem key={key} value={key}>
                 {label}
@@ -119,7 +139,7 @@ export function ProspectFilters({ onFilterChange }: ProspectFiltersProps) {
             <SelectValue placeholder="Tous les canaux" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Tous les canaux</SelectItem>
+            <SelectItem value="all">Tous les canaux</SelectItem>
             {Object.entries(LEAD_CHANNEL_LABEL).map(([key, label]) => (
               <SelectItem key={key} value={key}>
                 {label}

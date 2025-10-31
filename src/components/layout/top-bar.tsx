@@ -32,7 +32,7 @@ export function TopBar() {
       {/* Logo */}
       <Link href="/dashboard" className="flex items-center space-x-3">
         <Sparkles className="h-8 w-8 text-blue-600" />
-        <span className="text-xl font-bold text-gray-900">CMR Prospect</span>
+        <span className="text-xl font-bold text-gray-900">ProspectsHub</span>
       </Link>
 
       {/* User Dropdown */}
