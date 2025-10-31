@@ -16,6 +16,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Formation, CreateFormationData, UpdateFormationData } from "@/types/formation";
 import { FORMATION_STATUS } from "@/lib/constants";
 import countries from "world-countries";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
 
 // Schéma de validation
 const formSchema = z.object({
@@ -36,6 +39,7 @@ interface FormationEditDialogProps {
 
 export function FormationEditDialog({ isOpen, onClose, formation, onSubmit, currentUser }: FormationEditDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [countrySearch, setCountrySearch] = useState("");
   const isEditing = !!formation;
 
   // Trier les pays par ordre alphabétique
@@ -47,6 +51,14 @@ export function FormationEditDialog({ isOpen, onClose, formation, onSubmit, curr
       }))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, []);
+
+  // Filtrer les pays selon la recherche
+  const filteredCountries = useMemo(() => {
+    if (!countrySearch) return sortedCountries;
+    return sortedCountries.filter(country => 
+      country.name.toLowerCase().includes(countrySearch.toLowerCase())
+    );
+  }, [countrySearch, sortedCountries]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -128,20 +140,53 @@ export function FormationEditDialog({ isOpen, onClose, formation, onSubmit, curr
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Pays</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un pays" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {sortedCountries.map((country) => (
-                        <SelectItem key={country.code} value={country.name}>
-                          {country.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className="w-full justify-between"
+                      >
+                        {field.value ? (
+                          sortedCountries.find(c => c.name === field.value)?.name || "Sélectionner un pays"
+                        ) : "Sélectionner un pays"}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput
+                          placeholder="Rechercher un pays..."
+                          value={countrySearch}
+                          onValueChange={setCountrySearch}
+                        />
+                        <CommandEmpty>Aucun pays trouvé.</CommandEmpty>
+                        <CommandGroup className="max-h-60 overflow-auto">
+                          <CommandItem
+                            value={field.value}
+                            onSelect={() => {
+                              field.onChange("");
+                              setCountrySearch("");
+                            }}
+                          >
+                            {field.value || "Sélectionner un pays"}
+                          </CommandItem>
+                          {filteredCountries.map((country) => (
+                            <CommandItem
+                              key={country.code}
+                              value={country.name}
+                              onSelect={() => {
+                                field.onChange(country.name);
+                                setCountrySearch("");
+                              }}
+                            >
+                              {country.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}

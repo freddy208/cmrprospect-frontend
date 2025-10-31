@@ -163,20 +163,68 @@ export async function getProspect(id: string) {
 
 // Dans src/lib/api.ts, modifiez la fonction createProspect comme suit :
 
+// Modifiez la fonction createProspect comme suit :
 export async function createProspect(data: CreateProspectData) {
   try {
     console.log("Données envoyées à l'API:", data);
-    const response = await api.post<Prospect>('/prospects', data);
-    return response.data;
+    
+    // Séparez le commentaire des autres données
+    const { initialComment, ...prospectData } = data;
+    
+    // Créez d'abord le prospect
+    const response = await api.post<Prospect>('/prospects', prospectData);
+    const createdProspect = response.data;
+    
+    // Si un commentaire a été fourni, créez-le séparément
+    if (initialComment && initialComment.trim() !== '') {
+      try {
+        await createComment({
+          content: initialComment,
+          prospectId: createdProspect.id
+        });
+        console.log("Commentaire créé avec succès");
+      } catch (commentError) {
+        console.error("Erreur lors de la création du commentaire:", commentError);
+        // Ne pas rejeter l'erreur, le prospect a été créé même si le commentaire a échoué
+      }
+    }
+    
+    return createdProspect;
   } catch (error) {
     console.error("Erreur lors de la création du prospect:", error);
     throw error;
   }
 }
 
+// Modifiez la fonction updateProspect comme suit :
 export async function updateProspect(id: string, data: UpdateProspectData) {
-  const response = await api.patch<Prospect>(`/prospects/${id}`, data);
-  return response.data;
+  try {
+    // Séparez le commentaire des autres données
+    const { initialComment, ...prospectData } = data;
+    
+    // Mettez d'abord à jour le prospect
+    const response = await api.patch<Prospect>(`/prospects/${id}`, prospectData);
+    const updatedProspect = response.data;
+    
+    // Si un commentaire a été fourni, créez-le séparément
+    if (initialComment && initialComment.trim() !== '') {
+      try {
+        await createComment({
+          content: initialComment,
+          prospectId: id
+        });
+        console.log("Commentaire créé avec succès");
+      } catch (commentError) {
+        console.error("Erreur lors de la création du commentaire:", commentError);
+        // Ne pas rejeter l'erreur, le prospect a été mis à jour même si le commentaire a échoué
+      }
+    }
+    
+    return updatedProspect;
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour du prospect:", error);
+    throw error;
+  }
 }
 
 export async function deleteProspect(id: string) {

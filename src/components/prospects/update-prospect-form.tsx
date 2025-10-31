@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // src/components/prospects/update-prospect-form.tsx
@@ -20,10 +21,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { PROSPECT_TYPE, PROSPECT_TYPE_LABEL, PROSPECT_STATUS_LABEL, SERVICE_TYPE_LABEL, LEAD_CHANNEL_LABEL } from "@/lib/constants";
 import countries from "world-countries";
 import { Prospect, UpdateProspectData } from "@/types/prospect";
+import { Formation } from "@/types/formation";
+import { Simulateur } from "@/types/simulateur";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Mail, Phone, Globe, Briefcase, MessageSquare, Building, UserPlus, UserCheck, CreditCard, MapPin, Edit } from "lucide-react";
+import { User, Mail, Phone, Globe, Briefcase, MessageSquare, Building, UserPlus, UserCheck, CreditCard, MapPin, Edit, AlertCircle, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { getFormations } from "@/lib/api";
+import { getSimulateurs } from "@/lib/api";
 
 interface UpdateProspectFormProps {
   prospect: Prospect;
@@ -33,6 +40,14 @@ interface UpdateProspectFormProps {
 
 export function UpdateProspectForm({ prospect, onSubmit, isSubmitting }: UpdateProspectFormProps) {
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [formations, setFormations] = useState<Formation[]>([]);
+  const [simulateurs, setSimulateurs] = useState<Simulateur[]>([]);
+  const [isLoadingFormations, setIsLoadingFormations] = useState(false);
+  const [isLoadingSimulateurs, setIsLoadingSimulateurs] = useState(false);
+  const [formationsError, setFormationsError] = useState<string | null>(null);
+  const [simulateursError, setSimulateursError] = useState<string | null>(null);
+  const [formationPopoverOpen, setFormationPopoverOpen] = useState(false);
+  const [simulateurPopoverOpen, setSimulateurPopoverOpen] = useState(false);
   
   const form = useForm<UpdateProspectData>({
     defaultValues: {
@@ -51,11 +66,65 @@ export function UpdateProspectForm({ prospect, onSubmit, isSubmitting }: UpdateP
       contactLastName: prospect.contactLastName || "",
       whatsapp: prospect.whatsapp || "",
       status: prospect.status,
+      formationId: prospect.formation?.id || "",
+      simulateurId: prospect.simulateur?.id || "",
     },
   });
 
   // Watch for type changes to reset specific fields
   const prospectType = useWatch({ control: form.control, name: "type" });
+  const serviceType = useWatch({ control: form.control, name: "serviceType" });
+  const selectedFormationId = useWatch({ control: form.control, name: "formationId" });
+  const selectedSimulateurId = useWatch({ control: form.control, name: "simulateurId" });
+  
+  // Fetch formations when serviceType changes to FORMATION
+  useEffect(() => {
+    if (serviceType === "FORMATION") {
+      setIsLoadingFormations(true);
+      setFormationsError(null);
+      
+      getFormations()
+        .then((data) => {
+          setFormations(data);
+        })
+        .catch((error) => {
+          console.error("Erreur lors de la récupération des formations:", error);
+          setFormationsError("Impossible de charger les formations");
+        })
+        .finally(() => {
+          setIsLoadingFormations(false);
+        });
+    }
+  }, [serviceType]);
+
+  // Fetch simulateurs when serviceType changes to SIMULATEUR
+  useEffect(() => {
+    if (serviceType === "SIMULATEUR") {
+      setIsLoadingSimulateurs(true);
+      setSimulateursError(null);
+      
+      getSimulateurs()
+        .then((data) => {
+          setSimulateurs(data);
+        })
+        .catch((error) => {
+          console.error("Erreur lors de la récupération des simulateurs:", error);
+          setSimulateursError("Impossible de charger les simulateurs");
+        })
+        .finally(() => {
+          setIsLoadingSimulateurs(false);
+        });
+    }
+  }, [serviceType]);
+
+  // Reset formation/simulateur when service type changes
+  useEffect(() => {
+    if (serviceType === "FORMATION") {
+      form.setValue("simulateurId", "");
+    } else if (serviceType === "SIMULATEUR") {
+      form.setValue("formationId", "");
+    }
+  }, [serviceType, form]);
   
   useEffect(() => {
     if (prospectType === "PARTICULIER") {
@@ -93,8 +162,29 @@ export function UpdateProspectForm({ prospect, onSubmit, isSubmitting }: UpdateP
       cleanedData.contactLastName = data.contactLastName;
     }
 
+    // Ajouter l'ID de la formation ou du simulateur si applicable
+    if (data.serviceType === "FORMATION" && data.formationId) {
+      cleanedData.formationId = data.formationId;
+    } else if (data.serviceType === "SIMULATEUR" && data.simulateurId) {
+      cleanedData.simulateurId = data.simulateurId;
+    }
+
     onSubmit(cleanedData);
   });
+
+  // Helper pour trouver le nom de la formation sélectionnée
+  const getSelectedFormationName = () => {
+    if (!selectedFormationId) return "Sélectionner une formation";
+    const formation = formations.find(f => f.id === selectedFormationId);
+    return formation ? formation.name : "Formation non trouvée";
+  };
+
+  // Helper pour trouver le nom du simulateur sélectionné
+  const getSelectedSimulateurName = () => {
+    if (!selectedSimulateurId) return "Sélectionner un simulateur";
+    const simulateur = simulateurs.find(s => s.id === selectedSimulateurId);
+    return simulateur ? simulateur.name : "Simulateur non trouvé";
+  };
 
   return (
     <motion.div
@@ -621,11 +711,198 @@ export function UpdateProspectForm({ prospect, onSubmit, isSubmitting }: UpdateP
             </Card>
           </motion.div>
 
+          {/* Formation/Simulateur Section */}
+          <AnimatePresence>
+            {serviceType === "FORMATION" && (
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -20, opacity: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+              >
+                <Card className="border-0 shadow-sm bg-white">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2" style={{ color: "#171717" }}>
+                      <Briefcase className="h-5 w-5" style={{ color: "#1D4ED8" }} />
+                      Formation
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingFormations ? (
+                      <div className="flex items-center justify-center py-6">
+                        <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                        <span>Chargement des formations...</span>
+                      </div>
+                    ) : formationsError ? (
+                      <div className="flex items-center p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50" role="alert">
+                        <AlertCircle className="h-4 w-4 mr-2" />
+                        <span>{formationsError}</span>
+                      </div>
+                    ) : (
+                      <FormField
+                        control={form.control}
+                        name="formationId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-700">Formation</FormLabel>
+                            <Popover open={formationPopoverOpen} onOpenChange={setFormationPopoverOpen}>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    className={cn(
+                                      "w-full justify-between h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500",
+                                      !field.value && "text-muted-foreground"
+                                    )}
+                                  >
+                                    {getSelectedFormationName()}
+                                    <Briefcase className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-full p-0">
+                                <ScrollArea className="h-72">
+                                  <div className="p-1">
+                                    {formations.length === 0 ? (
+                                      <div className="py-6 text-center text-sm text-gray-500">
+                                        Aucune formation disponible
+                                      </div>
+                                    ) : (
+                                      formations.map((formation) => (
+                                        <div
+                                          key={formation.id}
+                                          className={cn(
+                                            "relative flex cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
+                                            field.value === formation.id && "bg-accent text-accent-foreground"
+                                          )}
+                                          onClick={() => {
+                                            field.onChange(formation.id);
+                                            setFormationPopoverOpen(false);
+                                          }}
+                                        >
+                                          <div className="flex flex-col">
+                                            <span className="font-medium">{formation.name}</span>
+                                            <span className="text-xs text-gray-500">
+                                              {formation.country} - {formation.price}€
+                                            </span>
+                                          </div>
+                                        </div>
+                                      ))
+                                    )}
+                                  </div>
+                                </ScrollArea>
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {serviceType === "SIMULATEUR" && (
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -20, opacity: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+              >
+                <Card className="border-0 shadow-sm bg-white">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2" style={{ color: "#171717" }}>
+                      <CreditCard className="h-5 w-5" style={{ color: "#1D4ED8" }} />
+                      Simulateur
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingSimulateurs ? (
+                      <div className="flex items-center justify-center py-6">
+                        <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                        <span>Chargement des simulateurs...</span>
+                      </div>
+                    ) : simulateursError ? (
+                      <div className="flex items-center p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50" role="alert">
+                        <AlertCircle className="h-4 w-4 mr-2" />
+                        <span>{simulateursError}</span>
+                      </div>
+                    ) : (
+                      <FormField
+                        control={form.control}
+                        name="simulateurId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-700">Simulateur</FormLabel>
+                            <Popover open={simulateurPopoverOpen} onOpenChange={setSimulateurPopoverOpen}>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    className={cn(
+                                      "w-full justify-between h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500",
+                                      !field.value && "text-muted-foreground"
+                                    )}
+                                  >
+                                    {getSelectedSimulateurName()}
+                                    <CreditCard className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-full p-0">
+                                <ScrollArea className="h-72">
+                                  <div className="p-1">
+                                    {simulateurs.length === 0 ? (
+                                      <div className="py-6 text-center text-sm text-gray-500">
+                                        Aucun simulateur disponible
+                                      </div>
+                                    ) : (
+                                      simulateurs.map((simulateur) => (
+                                        <div
+                                          key={simulateur.id}
+                                          className={cn(
+                                            "relative flex cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
+                                            field.value === simulateur.id && "bg-accent text-accent-foreground"
+                                          )}
+                                          onClick={() => {
+                                            field.onChange(simulateur.id);
+                                            setSimulateurPopoverOpen(false);
+                                          }}
+                                        >
+                                          <div className="flex flex-col">
+                                            <span className="font-medium">{simulateur.name}</span>
+                                            <span className="text-xs text-gray-500">
+                                              {simulateur.country} - {simulateur.monthlyPrice}€/mois
+                                            </span>
+                                          </div>
+                                        </div>
+                                      ))
+                                    )}
+                                  </div>
+                                </ScrollArea>
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Comments Section */}
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
           >
             <Card className="border-0 shadow-sm bg-white">
               <CardHeader className="pb-3">
@@ -668,7 +945,7 @@ export function UpdateProspectForm({ prospect, onSubmit, isSubmitting }: UpdateP
             className="flex justify-end"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
           >
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button

@@ -16,6 +16,7 @@ import {
   Calculator,
   Shield,
   Menu,
+  MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -24,9 +25,10 @@ import { ROLE_LABEL } from "@/lib/constants";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Prospects Particuliers", href: "/prospects/", icon: Users },
-  { name: "Prospects Entreprises", href: "/prospects/entreprises", icon: Users2 },
+  { name: "Prospects Entreprises", href: "/prospectsEntreprises", icon: Users2 },
   { name: "Interactions", href: "/interactions", icon: MessageSquare },
-  { name: "Prospects Aboutis", href: "/prospects/aboutis", icon: CheckCircle },
+  { name: "Commentaires", href: "/comments", icon: MessageCircle },
+  { name: "Prospects Aboutis", href: "/prospectsAboutis", icon: CheckCircle },
   { name: "Équipes", href: "/equipes", icon: UserCheck },
   { name: "Formations", href: "/formations", icon: GraduationCap },
   { name: "Simulateur", href: "/simulateurs", icon: Calculator },
