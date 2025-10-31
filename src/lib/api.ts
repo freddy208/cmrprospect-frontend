@@ -3,8 +3,8 @@
 import axios from "axios";
 import type { DashboardStats, DashboardFilter } from "@/types/dashboard";
 import type { Prospect, ProspectFilter, CreateProspectData, UpdateProspectData } from "@/types/prospect";
-import type { Comment } from "@/types/index" // On créera ces types plus tard
 import { CreateInteractionData, InteractionFilter, UpdateInteractionData, Interaction} from "@/types/interaction";
+import { CreateCommentData, CommentFilter, UpdateCommentData, Comment } from "@/types/comment";
 
 
 
@@ -287,6 +287,70 @@ export async function getInteractionCountByUser(userId: string) {
 
 // La fonction addInteractionToProspect est remplacée par createInteraction
 // export async function addInteractionToProspect(prospectId: string, data: any) { ... }
+
+// ... (le reste du fichier est inchangé)
+
+
+// --- NOUVELLES FONCTIONS POUR LE MODULE COMMENT ---
+
+export async function getComments(filter?: CommentFilter) {
+  const params = new URLSearchParams();
+  if (filter) {
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        params.append(key, String(value));
+      }
+    });
+  }
+  const queryString = params.toString();
+  const url = `/comments${queryString ? `?${queryString}` : ''}`;
+  const response = await api.get<Comment[]>(url);
+  return response.data;
+}
+
+export async function createComment(data: CreateCommentData) {
+  try {
+    const response = await api.post<Comment>('/comments', data);
+    // S'assurer que la réponse contient les informations de l'utilisateur
+    if (!response.data.user) {
+      const user = await getCurrentUser();
+      response.data.user = user;
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de la création du commentaire:", error);
+    throw error;
+  }
+}
+
+export async function updateComment(id: string, data: UpdateCommentData) {
+  const response = await api.patch<Comment>(`/comments/${id}`, data);
+  return response.data;
+}
+
+export async function deleteComment(id: string) {
+  // Le backend fait un soft-delete, donc on peut s'attendre à une réponse 204 No Content ou un objet mis à jour.
+  const response = await api.delete(`/comments/${id}`);
+  return response.data;
+}
+
+export async function getCommentCountByProspect(prospectId: string) {
+  const response = await api.get<{ count: number }>(`/comments/count/prospect/${prospectId}`);
+  return response.data.count;
+}
+
+export async function getCommentCountByUser(userId: string) {
+  const response = await api.get<{ count: number }>(`/comments/count/user/${userId}`);
+  return response.data.count;
+}
+
+// --- ANCIENNES FONCTIONS À SUPPRIMER OU REMPLACER ---
+
+// La fonction getCommentsForProspect est remplacée par getComments({ prospectId })
+// export async function getCommentsForProspect(prospectId: string) { ... }
+
+// La fonction addCommentToProspect est remplacée par createComment
+// export async function addCommentToProspect(prospectId: string, content: string) { ... }
 
 // ... (le reste du fichier est inchangé)
 

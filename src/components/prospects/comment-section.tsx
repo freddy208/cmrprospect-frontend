@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MessageSquarePlus, Send } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { addCommentToProspect } from "@/lib/api";
+import { createComment } from "@/lib/api"; // Modification ici
 import { toast } from "sonner";
 import { CommentList } from "./comment-list";
 import { Separator } from "@/components/ui/separator";
@@ -30,7 +30,11 @@ export function CommentSection({ prospectId }: CommentSectionProps) {
 
     setIsSubmitting(true);
     try {
-      await addCommentToProspect(prospectId, newComment);
+      // Modification ici : utilisation de createComment avec les bons paramètres
+      await createComment({
+        content: newComment,
+        prospectId: prospectId,
+      });
       setNewComment("");
       toast.success("Commentaire ajouté !");
       // Forcer un rafraîchissement des commentaires

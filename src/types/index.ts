@@ -14,13 +14,7 @@ export type Interaction = {
   };
 };
 
-export type Comment = {
-  id: string;
-  content: string;
-  createdAt: string;
-  user: {
-    id: string;
-    firstName?: string | null;
-    lastName?: string | null;
-  };
-};
+// src/types/index.ts
+
+// ... (imports existants)
+export type { Comment, CreateCommentData, UpdateCommentData, CommentFilter } from './comment';

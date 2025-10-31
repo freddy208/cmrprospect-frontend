@@ -93,3 +93,15 @@ export const USER_STATUS = {
 
 // --- NOUVELLES CONSTANTES POUR LES INTERACTIONS ---
 
+export const COMMENT_STATUS = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+  DELETED: "DELETED",
+} as const;
+
+export const COMMENT_STATUS_LABEL: Record<string, string> = {
+  ACTIVE: "Actif",
+  INACTIVE: "Inactif",
+  DELETED: "Supprimé",
+};
+

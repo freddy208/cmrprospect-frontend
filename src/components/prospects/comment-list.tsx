@@ -1,7 +1,7 @@
 // src/components/prospects/comment-list.tsx
 "use client";
 
-import { getCommentsForProspect } from "@/lib/api";
+import { getComments } from "@/lib/api"; // Modification ici
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { MessageSquare } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import type { Comment } from "@/types/index";
+import type { Comment } from "@/types/comment"; // Modification ici pour utiliser le bon type
 
 interface CommentListProps {
   prospectId: string;
@@ -18,7 +18,7 @@ interface CommentListProps {
 export function CommentList({ prospectId }: CommentListProps) {
   const { data, isLoading, error } = useQuery<Comment[]>({
     queryKey: ["comments", prospectId],
-    queryFn: () => getCommentsForProspect(prospectId),
+    queryFn: () => getComments({ prospectId }), // Modification ici
   });
 
   if (isLoading) {
@@ -72,25 +72,35 @@ export function CommentList({ prospectId }: CommentListProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: index * 0.1 }}
         >
-          <Card className="shadow-sm border-0">
+          <Card className="shadow-sm border-0" style={{ borderLeft: "4px solid #1D4ED8" }}>
             <CardContent className="p-4">
               <div className="flex space-x-3">
                 <Avatar className="h-10 w-10">
                   <AvatarFallback style={{ backgroundColor: "#EBF5FF", color: "#1D4ED8" }}>
-                    {comment.user.firstName?.charAt(0)}
-                    {comment.user.lastName?.charAt(0)}
+                    {comment.user ? (
+                      <>
+                        {comment.user.firstName?.charAt(0)}
+                        {comment.user.lastName?.charAt(0)}
+                      </>
+                    ) : (
+                      "?"
+                    )}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium" style={{ color: "#171717" }}>
-                      {comment.user.firstName} {comment.user.lastName}
+                      {comment.user ? (
+                        `${comment.user.firstName} ${comment.user.lastName}`
+                      ) : (
+                        "Utilisateur inconnu"
+                      )}
                     </p>
                     <p className="text-xs text-gray-500">
                       {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: fr })}
                     </p>
                   </div>
-                  <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">
+                  <p className="text-sm text-gray-700 p-3 rounded-lg" style={{ backgroundColor: "#F9FAFB" }}>
                     {comment.content}
                   </p>
                 </div>
