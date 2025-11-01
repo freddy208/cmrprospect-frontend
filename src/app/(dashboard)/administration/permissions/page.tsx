@@ -13,7 +13,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AdminLayout } from "@/components/admin/AdminLayout";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useAdminContext } from "@/hooks/useAdminContext";
 import { PERMISSION_GROUPS } from "@/lib/constants";
@@ -43,7 +42,7 @@ export default function PermissionsPage() {
   // ✅ Vérification que permissions est bien un tableau avant de filtrer
   const filteredPermissions = Array.isArray(permissions) ? permissions.filter((permission: Permission) => {
     const matchesSearch = permission.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (permission.description && permission.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      (permission.description && permission.description.toLowerCase().includes(searchTerm.toLowerCase()));
     
     // ✅ Gestion claire des cas spéciaux
     if (activeTab === "all" || activeTab === "other") return matchesSearch;
@@ -81,7 +80,6 @@ export default function PermissionsPage() {
   };
 
   return (
-    <AdminLayout>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -207,6 +205,5 @@ export default function PermissionsPage() {
           </TabsContent>
         </Tabs>
       </motion.div>
-    </AdminLayout>
   );
 }
