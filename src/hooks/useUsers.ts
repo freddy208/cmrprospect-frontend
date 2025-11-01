@@ -4,19 +4,20 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "./useAuth";
-import { 
-  getUsers, 
-  getUser, 
-  createUser, 
-  updateUser, 
+import {
+  getUsers,
+  getUser,
+  createUser,
+  updateUser,
   deleteUser,
   resetUserPassword,
-  toggleUserStatus
+  toggleUserStatus,
+  getUserStats
 } from "@/lib/api";
-import { 
-  User, 
-  UserFilter, 
-  CreateUserData, 
+import {
+  User,
+  UserFilter,
+  CreateUserData,
   UpdateUserData
 } from "@/types/user";
 
@@ -36,6 +37,8 @@ type UseUsersReturn = {
   getById: (id: string) => Promise<User | null>;
   resetPassword: (id: string) => Promise<boolean>;
   toggleStatus: (id: string) => Promise<User | null>;
+  getStats: (id: string) => Promise<any>;
+  getRecentUsers: (limit?: number) => Promise<User[]>;
 };
 
 export function useUsers({ initialFilter, autoFetch = true }: UseUsersOptions = {}): UseUsersReturn {
@@ -94,7 +97,7 @@ export function useUsers({ initialFilter, autoFetch = true }: UseUsersOptions = 
       setError("Utilisateur non connecté");
       return null;
     }
-    
+
     try {
       const updatedUser = await updateUser(id, data);
       setUsers(prev => prev.map(u => u.id === id ? updatedUser : u));
@@ -140,7 +143,7 @@ export function useUsers({ initialFilter, autoFetch = true }: UseUsersOptions = 
       setError("Utilisateur non connecté");
       return null;
     }
-    
+
     try {
       const updatedUser = await toggleUserStatus(id);
       setUsers(prev => prev.map(u => u.id === id ? updatedUser : u));
@@ -148,6 +151,38 @@ export function useUsers({ initialFilter, autoFetch = true }: UseUsersOptions = 
     } catch (err: any) {
       setError(err?.response?.data?.message || "Erreur lors du changement de statut.");
       return null;
+    }
+  }, [user]);
+
+  const getStatsHandler = useCallback(async (id: string): Promise<any> => {
+    try {
+      return await getUserStats(id);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Erreur lors de la récupération des statistiques.");
+      return null;
+    }
+  }, []);
+
+  // Nouvelle méthode pour récupérer les utilisateurs récents selon leur dernière connexion
+  const getRecentUsersHandler = useCallback(async (limit = 5): Promise<User[]> => {
+    if (!user) {
+      setError("Utilisateur non connecté");
+      return [];
+    }
+    
+    try {
+      // Créer un filtre pour trier par dernière connexion
+      const recentFilter: UserFilter = {
+        sortBy: "lastLogin",
+        sortOrder: "desc",
+        limit
+      };
+      
+      return await getUsers(recentFilter);
+    } catch (err: any) {
+      console.error("Erreur lors de la récupération des utilisateurs récents:", err);
+      setError(err?.response?.data?.message || "Une erreur est survenue.");
+      return [];
     }
   }, [user]);
 
@@ -161,6 +196,8 @@ export function useUsers({ initialFilter, autoFetch = true }: UseUsersOptions = 
     remove: deleteUserHandler,
     getById: getByIdHandler,
     resetPassword: resetPasswordHandler,
-    toggleStatus: toggleStatusHandler
+    toggleStatus: toggleStatusHandler,
+    getStats: getStatsHandler,
+    getRecentUsers: getRecentUsersHandler
   };
 }

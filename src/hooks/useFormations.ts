@@ -89,11 +89,11 @@ export function useFormations({ initialFilter, autoFetch = true }: UseFormations
     }
   }, [fetchFormations, filter, autoFetch]);
 
-  const refetch = useCallback(async (newFilter?: FormationFilter) => {
-    const finalFilter = newFilter || filter;
-    setFilter(finalFilter);
-    await fetchFormations(finalFilter);
-  }, [fetchFormations, filter]);
+const refetch = useCallback(async (newFilter?: FormationFilter) => {
+  const finalFilter = newFilter || filter;
+  setFilter(finalFilter);
+  await fetchFormations(finalFilter);
+}, [fetchFormations, filter]);
 
   const createFormationHandler = useCallback(async (data: CreateFormationData): Promise<Formation | null> => {
     if (!user) return null;

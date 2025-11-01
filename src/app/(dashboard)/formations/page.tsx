@@ -31,17 +31,23 @@ export default function FormationsPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
 
-  const {
-    formations,
-    isLoading,
-    error,
-    refetch,
-    create,
-    update,
-    remove,
-    stats,
-    fetchStats
-  } = useFormations({ autoFetch: true });
+// Par
+const {
+  formations,
+  isLoading,
+  error,
+  refetch,
+  create,
+  update,
+  remove,
+  stats,
+  fetchStats
+} = useFormations({ initialFilter: filters, autoFetch: true });
+
+// Ajouter un useEffect pour recharger les données lorsque les filtres changent
+useEffect(() => {
+  refetch(filters);
+}, [filters, refetch]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -56,10 +62,10 @@ export default function FormationsPage() {
     fetchStats();
   }, [fetchStats]);
 
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setFilters({ ...filters, search: value });
-  };
+const handleSearch = (value: string) => {
+  setSearchTerm(value);
+  setFilters(prev => ({ ...prev, search: value }));
+};
 
   const handleFilter = (newFilters: FormationFilter) => {
     setFilters(newFilters);

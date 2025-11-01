@@ -3,7 +3,8 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Sparkles, User,  LogOut } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,7 @@ import { Button } from "@/components/ui/button";
 
 export function TopBar() {
   const { user, logout } = useAuth();
+  const router = useRouter();
 
   const getInitials = (name: string) => {
     if (!name) return "U";
@@ -25,6 +27,23 @@ export function TopBar() {
       .join("")
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const handleViewProfile = () => {
+    if (user?.id) {
+      router.push(`/profile/${user.id}`);
+    }
+  };
+
+  const handleEditProfile = () => {
+    if (user?.id) {
+      router.push(`/profile/${user.id}/edit`);
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
   };
 
   return (
@@ -58,10 +77,17 @@ export function TopBar() {
             </div>
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Profil</DropdownMenuItem>
-          <DropdownMenuItem>Paramètres</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleViewProfile} className="cursor-pointer">
+            <User className="mr-2 h-4 w-4" />
+            Voir mon profil
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleEditProfile} className="cursor-pointer">
+            <User className="mr-2 h-4 w-4" />
+            Modifier mon profil
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={logout} className="text-red-600">
+          <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer">
+            <LogOut className="mr-2 h-4 w-4" />
             Déconnexion
           </DropdownMenuItem>
         </DropdownMenuContent>

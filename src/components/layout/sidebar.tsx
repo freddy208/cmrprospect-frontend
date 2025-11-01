@@ -29,7 +29,7 @@ const navigation = [
   { name: "Interactions", href: "/interactions", icon: MessageSquare },
   { name: "Commentaires", href: "/comments", icon: MessageCircle },
   { name: "Prospects Aboutis", href: "/prospectsAboutis", icon: CheckCircle },
-  { name: "Équipes", href: "/equipes", icon: UserCheck },
+  { name: "Équipes", href: "/users", icon: UserCheck },
   { name: "Formations", href: "/formations", icon: GraduationCap },
   { name: "Simulateur", href: "/simulateurs", icon: Calculator },
   { name: "Gestion des droits", href: "/administration", icon: Shield },

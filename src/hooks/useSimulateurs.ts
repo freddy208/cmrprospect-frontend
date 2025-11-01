@@ -89,11 +89,11 @@ export function useSimulateurs({ initialFilter, autoFetch = true }: UseSimulateu
     }
   }, [fetchSimulateurs, filter, autoFetch]);
 
-  const refetch = useCallback(async (newFilter?: SimulateurFilter) => {
-    const finalFilter = newFilter || filter;
-    setFilter(finalFilter);
-    await fetchSimulateurs(finalFilter);
-  }, [fetchSimulateurs, filter]);
+ const refetch = useCallback(async (newFilter?: SimulateurFilter) => {
+  const finalFilter = newFilter || filter;
+  setFilter(finalFilter);
+  await fetchSimulateurs(finalFilter);
+}, [fetchSimulateurs, filter]);
 
   const createSimulateurHandler = useCallback(async (data: CreateSimulateurData): Promise<Simulateur | null> => {
     if (!user) return null;

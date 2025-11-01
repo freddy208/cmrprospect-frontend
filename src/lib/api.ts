@@ -618,6 +618,10 @@ export async function getPermissions(filter?: PermissionFilter) {
 }
 
 // Fonctions pour les utilisateurs
+
+// --- NOUVELLES FONCTIONS POUR LE MODULE UTILISATEUR ---
+
+// src/lib/api.ts
 export async function getUsers(filter?: UserFilter) {
   const params = new URLSearchParams();
   if (filter) {
@@ -628,19 +632,19 @@ export async function getUsers(filter?: UserFilter) {
     });
   }
   const queryString = params.toString();
-  const url = `/administration/users${queryString ? `?${queryString}` : ''}`;
+  const url = `/users${queryString ? `?${queryString}` : ''}`;
   const response = await api.get<User[]>(url);
   return response.data;
 }
 
 export async function getUser(id: string) {
-  const response = await api.get<User>(`/administration/users/${id}`);
+  const response = await api.get<User>(`/users/${id}`);
   return response.data;
 }
 
 export async function createUser(data: CreateUserData) {
   try {
-    const response = await api.post<User>('/administration/users', data);
+    const response = await api.post<User>('/users', data);
     return response.data;
   } catch (error) {
     console.error("Erreur lors de la création de l'utilisateur:", error);
@@ -649,22 +653,27 @@ export async function createUser(data: CreateUserData) {
 }
 
 export async function updateUser(id: string, data: UpdateUserData) {
-  const response = await api.patch<User>(`/administration/users/${id}`, data);
+  const response = await api.patch<User>(`/users/${id}`, data);
   return response.data;
 }
 
 export async function deleteUser(id: string) {
-  const response = await api.delete(`/administration/users/${id}`);
+  const response = await api.delete(`/users/${id}`);
   return response.data;
 }
 
 export async function resetUserPassword(id: string) {
-  const response = await api.post(`/administration/users/${id}/reset-password`);
+  const response = await api.post(`/users/${id}/reset-password`);
   return response.data;
 }
 
 export async function toggleUserStatus(id: string) {
-  const response = await api.patch(`/administration/users/${id}/toggle-status`);
+  const response = await api.patch(`/users/${id}/toggle-status`);
+  return response.data;
+}
+
+export async function getUserStats(id: string) {
+  const response = await api.get(`/users/${id}/stats`);
   return response.data;
 }
 

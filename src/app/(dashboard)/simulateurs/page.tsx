@@ -31,18 +31,23 @@ export default function SimulateursPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
 
-  const {
-    simulateurs,
-    isLoading,
-    error,
-    refetch,
-    create,
-    update,
-    remove,
-    stats,
-    fetchStats
-  } = useSimulateurs({ autoFetch: true });
+  // Par
+const {
+  simulateurs,
+  isLoading,
+  error,
+  refetch,
+  create,
+  update,
+  remove,
+  stats,
+  fetchStats
+} = useSimulateurs({ initialFilter: filters, autoFetch: true });
 
+// Ajouter un useEffect pour recharger les données lorsque les filtres changent
+useEffect(() => {
+  refetch(filters);
+}, [filters, refetch]);
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -56,10 +61,10 @@ export default function SimulateursPage() {
     fetchStats();
   }, [fetchStats]);
 
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setFilters({ ...filters, search: value });
-  };
+const handleSearch = (value: string) => {
+  setSearchTerm(value);
+  setFilters(prev => ({ ...prev, search: value }));
+};
 
   const handleFilter = (newFilters: SimulateurFilter) => {
     setFilters(newFilters);

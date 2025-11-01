@@ -32,6 +32,8 @@ export type CreateUserData = {
   lastName: string;
   roleId: string;
   country?: string;
+  isActive?: boolean;
+  status?: 'ACTIVE' | 'INACTIVE' | 'DELETED';
 };
 
 export type UpdateUserData = Partial<Omit<CreateUserData, 'password'>> & {
@@ -40,10 +42,15 @@ export type UpdateUserData = Partial<Omit<CreateUserData, 'password'>> & {
   status?: 'ACTIVE' | 'INACTIVE' | 'DELETED';
 };
 
+// src/types/user.ts
 export type UserFilter = {
   search?: string;
   roleId?: string;
   country?: string;
   status?: 'ACTIVE' | 'INACTIVE' | 'DELETED';
   isActive?: boolean;
+  sortBy?: 'createdAt' | 'lastLogin' | 'firstName' | 'lastName' | 'email';
+  sortOrder?: 'asc' | 'desc';
+  limit?: number;
+  offset?: number;
 };

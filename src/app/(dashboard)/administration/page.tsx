@@ -23,6 +23,7 @@ import { useUsers } from "@/hooks/useUsers";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useAdminContext } from "@/hooks/useAdminContext";
 import { useRouter } from "next/navigation";
+import { User } from "@/types/user";
 
 interface StatCardProps {
   title: string;
@@ -70,22 +71,50 @@ export default function AdminDashboard() {
   const router = useRouter();
   const { setActiveSection } = useAdminContext();
   const { roles } = useRoles({ autoFetch: true });
-  const { users } = useUsers({ autoFetch: true });
+  const { users, getRecentUsers } = useUsers({ autoFetch: true });
   const { permissions } = usePermissions({ autoFetch: true });
+  const [recentUsers, setRecentUsers] = useState<User[]>([]);
+  const [isLoadingRecentUsers, setIsLoadingRecentUsers] = useState(false);
 
   useEffect(() => {
     setActiveSection("dashboard");
   }, [setActiveSection]);
 
-  const recentUsers = users.slice(0, 5);
+  useEffect(() => {
+    const fetchRecentUsers = async () => {
+      setIsLoadingRecentUsers(true);
+      try {
+        const users = await getRecentUsers(5);
+        setRecentUsers(users);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des utilisateurs récents:", error);
+      } finally {
+        setIsLoadingRecentUsers(false);
+      }
+    };
+
+    fetchRecentUsers();
+  }, [getRecentUsers]);
+
   const rolesWithMostUsers = [...roles].sort((a, b) => b._count.users - a._count.users).slice(0, 3);
 
   const handleNavigate = (path: string) => {
     router.push(path);
   };
 
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "Jamais";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   return (
-    <AdminLayout>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -101,13 +130,6 @@ export default function AdminDashboard() {
         {/* Statistiques */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
           <StatCard
-            title="Utilisateurs"
-            value={users.length}
-            description="Utilisateurs actifs"
-            icon={<Users className="h-4 w-4 text-blue-600" />}
-            trend={{ value: 12, isPositive: true }}
-          />
-          <StatCard
             title="Rôles"
             value={roles.length}
             description="Rôles définis"
@@ -119,13 +141,6 @@ export default function AdminDashboard() {
             value={permissions.length}
             description="Permissions disponibles"
             icon={<Key className="h-4 w-4 text-blue-600" />}
-          />
-          <StatCard
-            title="Activité"
-            value={87}
-            description="Actions cette semaine"
-            icon={<Activity className="h-4 w-4 text-blue-600" />}
-            trend={{ value: 8, isPositive: false }}
           />
         </div>
 
@@ -144,44 +159,57 @@ export default function AdminDashboard() {
                 </Button>
               </div>
               <CardDescription>
-                Les derniers utilisateurs ajoutés au système
+                Les derniers utilisateurs connectés au système
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {recentUsers.map((user, index) => (
-                  <motion.div
-                    key={user.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                    className="flex items-center"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-sm mr-3">
-                      {user.firstName?.charAt(0) || user.email.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="ml-4 space-y-1 flex-1">
-                      <p className="text-sm font-medium leading-none">
-                        {user.firstName && user.lastName 
-                          ? `${user.firstName} ${user.lastName}` 
-                          : user.email
-                        }
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {user.email}
-                      </p>
-                    </div>
-                    <div className="ml-auto flex items-center space-x-2">
-                      <Badge variant={user.isActive ? "default" : "secondary"}>
-                        {user.isActive ? "Actif" : "Inactif"}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">
-                        {user.role.name}
-                      </Badge>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+              {isLoadingRecentUsers ? (
+                <div className="flex justify-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                </div>
+              ) : recentUsers.length === 0 ? (
+                <div className="text-center py-4 text-gray-500">
+                  Aucun utilisateur récent
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {recentUsers.map((user, index) => (
+                    <motion.div
+                      key={user.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                      className="flex items-center"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-sm mr-3">
+                        {user.firstName?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="ml-4 space-y-1 flex-1">
+                        <p className="text-sm font-medium leading-none">
+                          {user.firstName && user.lastName 
+                            ? `${user.firstName} ${user.lastName}` 
+                            : user.email
+                          }
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {user.email}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Dernière connexion: {formatDate(user.lastLogin || '')}
+                        </p>
+                      </div>
+                      <div className="ml-auto flex items-center space-x-2">
+                        <Badge variant={user.isActive ? "default" : "secondary"}>
+                          {user.isActive ? "Actif" : "Inactif"}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {user.role.name}
+                        </Badge>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -193,7 +221,7 @@ export default function AdminDashboard() {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => handleNavigate("/administration/roles")}
+                  onClick={() => handleNavigate("/administration/role")}
                 >
                   Voir tout
                 </Button>
@@ -247,7 +275,7 @@ export default function AdminDashboard() {
               <Button 
                 variant="outline" 
                 className="h-auto p-4 flex-col items-start"
-                onClick={() => handleNavigate("/administration/users")}
+                onClick={() => handleNavigate("/users")}
               >
                 <UserPlus className="h-5 w-5 mb-2" />
                 <span className="font-medium">Créer un utilisateur</span>
@@ -258,7 +286,7 @@ export default function AdminDashboard() {
               <Button 
                 variant="outline" 
                 className="h-auto p-4 flex-col items-start"
-                onClick={() => handleNavigate("/administration/roles")}
+                onClick={() => handleNavigate("/administration/role")}
               >
                 <Shield className="h-5 w-5 mb-2" />
                 <span className="font-medium">Créer un rôle</span>
@@ -277,21 +305,9 @@ export default function AdminDashboard() {
                   Consulter les permissions
                 </span>
               </Button>
-              <Button 
-                variant="outline" 
-                className="h-auto p-4 flex-col items-start"
-                onClick={() => handleNavigate("/administration/settings")}
-              >
-                <BarChart3 className="h-5 w-5 mb-2" />
-                <span className="font-medium">Paramètres</span>
-                <span className="text-xs text-muted-foreground mt-1">
-                  Configurer le système
-                </span>
-              </Button>
             </div>
           </CardContent>
         </Card>
       </motion.div>
-    </AdminLayout>
   );
 }

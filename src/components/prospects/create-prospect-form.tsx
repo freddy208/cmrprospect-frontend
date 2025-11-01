@@ -19,10 +19,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { PROSPECT_TYPE, PROSPECT_TYPE_LABEL, SERVICE_TYPE_LABEL, LEAD_CHANNEL_LABEL } from "@/lib/constants";
 import countries from "world-countries";
 import { CreateProspectData } from "@/types/prospect";
+import { useUsers } from "@/hooks/useUsers";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Mail, Phone, Globe, Briefcase, MessageSquare, Building, UserPlus, UserCheck, CreditCard, MapPin } from "lucide-react";
+import { User, Mail, Phone, Globe, Briefcase, MessageSquare, Building, UserPlus, UserCheck, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface CreateProspectFormProps {
   onSubmit: (data: CreateProspectData) => void;
@@ -31,6 +34,8 @@ interface CreateProspectFormProps {
 
 export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: CreateProspectFormProps) {
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const { user: currentUser } = useAuth();
+  const { users, isLoading: isLoadingUsers } = useUsers({ autoFetch: true });
   
   const form = useForm<CreateProspectData>({
     defaultValues: {
@@ -103,6 +108,33 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
 
     onSubmitProp(cleanedData);
   });
+
+  // Filtrer les utilisateurs selon le rôle de l'utilisateur connecté
+  const getFilteredUsers = () => {
+    if (!currentUser) return [];
+    
+    // Si l'utilisateur est un DIRECTEUR_GENERAL, il peut voir tous les utilisateurs
+    if (currentUser.role.name === "DIRECTEUR_GENERAL") {
+      return users;
+    }
+    
+    // Si l'utilisateur est un COUNTRY_MANAGER, il ne peut voir que les utilisateurs de son pays
+    if (currentUser.role.name === "COUNTRY_MANAGER") {
+      return users.filter(user => 
+        user.country === currentUser.country || 
+        user.role.name === "DIRECTEUR_GENERAL"
+      );
+    }
+    
+    // Si l'utilisateur est un SALES_OFFICER, il ne peut s'assigner des prospects qu'à lui-même
+    if (currentUser.role.name === "SALES_OFFICER") {
+      return users.filter(user => user.id === currentUser.id);
+    }
+    
+    return users;
+  };
+
+  const filteredUsers = getFilteredUsers();
 
   return (
     <motion.div
@@ -289,7 +321,7 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                             </FormControl>
                             <SelectContent className="max-h-60 overflow-y-auto">
                               {countries.map((country) => (
-                                <SelectItem key={country.cca2} value={country.cca2}>
+                                <SelectItem key={country.cca2} value={country.name.common}>
                                   {country.name.common}
                                 </SelectItem>
                               ))}
@@ -577,7 +609,10 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                       >
                         <FormItem>
-                          <FormLabel className="text-gray-700">Assigné à</FormLabel>
+                          <FormLabel className="flex items-center gap-2 text-gray-700">
+                            <Users className="h-4 w-4" />
+                            Assigné à
+                          </FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
@@ -585,8 +620,27 @@ export function CreateProspectForm({ onSubmit: onSubmitProp, isSubmitting }: Cre
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {/* Ici, vous devrez implémenter la logique pour lister les utilisateurs selon le rôle de l'utilisateur connecté */}
-                              {/* TODO: Fetch users based on user role */}
+                              {isLoadingUsers ? (
+                                <div className="flex items-center justify-center py-2">
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                                  <span>Chargement...</span>
+                                </div>
+                              ) : filteredUsers.length === 0 ? (
+                                <div className="py-2 text-center text-sm text-gray-500">
+                                  Aucun utilisateur disponible
+                                </div>
+                              ) : (
+                                filteredUsers.map((user) => (
+                                  <SelectItem key={user.id} value={user.id}>
+                                    <div className="flex items-center gap-2">
+                                      <span>{user.firstName} {user.lastName}</span>
+                                      <Badge variant="outline" className="text-xs">
+                                        {user.role.name}
+                                      </Badge>
+                                    </div>
+                                  </SelectItem>
+                                ))
+                              )}
                             </SelectContent>
                           </Select>
                           <FormMessage />
