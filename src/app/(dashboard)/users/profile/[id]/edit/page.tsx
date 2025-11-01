@@ -46,7 +46,7 @@ export default function EditProfilePage() {
       await update(user.id, data);
       setUser({ ...user, ...data });
       setIsEditOpen(false);
-      router.push(``);
+      router.push(`/users/profile/${params.id}`);
     } catch (error) {
       console.error("Erreur lors de la mise à jour de l'utilisateur:", error);
     }
@@ -55,7 +55,7 @@ export default function EditProfilePage() {
   const handleClose = () => {
     if (user) {
       setIsEditOpen(false);
-      router.push(`users/profile/${params.id}`);
+      router.push(`/users/profile/${params.id}`);
     }
   };
 

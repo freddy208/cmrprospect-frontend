@@ -115,7 +115,7 @@ export default function ProfilePage() {
   };
 
   const handleEditProfile = () => {
-    router.push(`users/profile/${params.id}/edit`);
+    router.push(`/users/profile/${params.id}/edit`);
   };
 
   if (isLoading) {

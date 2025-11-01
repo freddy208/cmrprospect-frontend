@@ -149,7 +149,7 @@ export default function AdminDashboard() {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => handleNavigate("/administration/users")}
+                onClick={() => handleNavigate("/users")}
               >
                 Voir tout
               </Button>
