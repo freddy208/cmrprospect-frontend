@@ -70,49 +70,57 @@ export function EditRoleDialog({ open, onOpenChange, role, onSuccess }: EditRole
     }
   }, [open, role, form]);
 
-  const handleTogglePermission = (permissionId: string, checked: boolean) => {
-    const currentPermissions = form.getValues("permissionIds");
-    if (checked) {
-      form.setValue("permissionIds", [...currentPermissions, permissionId]);
-    } else {
-      form.setValue(
-        "permissionIds",
-        currentPermissions.filter((id) => id !== permissionId)
-      );
-    }
-  };
+  const handleTogglePermission = (permissionName: string, checked: boolean) => {
+  const permission = permissions.find(p => p.name === permissionName);
+  if (!permission) return;
+  
+  const currentPermissions = form.getValues("permissionIds");
+  if (checked) {
+    form.setValue("permissionIds", [...currentPermissions, permission.id]);
+  } else {
+    form.setValue(
+      "permissionIds",
+      currentPermissions.filter((id) => id !== permission.id)
+    );
+  }
+};
 
-  // CORRECTION: Convertir le tableau readonly en tableau modifiable
-  const handleToggleGroup = (groupPermissions: readonly string[], checked: boolean) => {
-    const currentPermissions = form.getValues("permissionIds");
-    const groupPermissionsArray = [...groupPermissions]; // Conversion en tableau modifiable
-    
-    if (checked) {
-      // Ajouter toutes les permissions du groupe qui ne sont pas déjà sélectionnées
-      const newPermissions = [
-        ...currentPermissions,
-        ...groupPermissionsArray.filter(id => !currentPermissions.includes(id))
-      ];
-      form.setValue("permissionIds", newPermissions);
-    } else {
-      // Retirer toutes les permissions du groupe
-      form.setValue(
-        "permissionIds",
-        currentPermissions.filter(id => !groupPermissionsArray.includes(id))
-      );
-    }
-  };
+const handleToggleGroup = (groupPermissions: readonly string[], checked: boolean) => {
+  const currentPermissions = form.getValues("permissionIds");
+  
+  // Convertir les NOMS en IDs
+  const groupPermissionIds = groupPermissions
+    .map(name => permissions.find(p => p.name === name)?.id)
+    .filter(Boolean) as string[];
+  
+  if (checked) {
+    const newPermissions = [
+      ...currentPermissions,
+      ...groupPermissionIds.filter(id => !currentPermissions.includes(id))
+    ];
+    form.setValue("permissionIds", newPermissions);
+  } else {
+    form.setValue(
+      "permissionIds",
+      currentPermissions.filter(id => !groupPermissionIds.includes(id))
+    );
+  }
+};
 
-  // CORRECTION: Accepter un tableau readonly en paramètre
-  const isGroupFullySelected = (groupPermissions: readonly string[]) => {
-    return groupPermissions.every(id => watchedPermissionIds.includes(id));
-  };
+const isGroupFullySelected = (groupPermissions: readonly string[]) => {
+  const groupPermissionIds = groupPermissions
+    .map(name => permissions.find(p => p.name === name)?.id)
+    .filter(Boolean) as string[];
+  return groupPermissionIds.every(id => watchedPermissionIds.includes(id));
+};
 
-  // CORRECTION: Accepter un tableau readonly en paramètre
-  const isGroupPartiallySelected = (groupPermissions: readonly string[]) => {
-    return groupPermissions.some(id => watchedPermissionIds.includes(id)) && 
-           !isGroupFullySelected(groupPermissions);
-  };
+const isGroupPartiallySelected = (groupPermissions: readonly string[]) => {
+  const groupPermissionIds = groupPermissions
+    .map(name => permissions.find(p => p.name === name)?.id)
+    .filter(Boolean) as string[];
+  return groupPermissionIds.some(id => watchedPermissionIds.includes(id)) && 
+         !isGroupFullySelected(groupPermissions);
+};
 
   const onSubmit = async (data: UpdateRoleFormValues) => {
     setIsSubmitting(true);
@@ -198,13 +206,28 @@ export function EditRoleDialog({ open, onOpenChange, role, onSuccess }: EditRole
                           {Object.entries(PERMISSION_GROUPS).map(([groupKey, groupPermissions]) => (
                             <div key={groupKey} className="space-y-2">
                               <div className="flex items-center space-x-2">
-                                <Checkbox
-                                  id={`group-${groupKey}`}
-                                  checked={isGroupFullySelected(groupPermissions)}
-                                  onCheckedChange={(checked) => 
-                                    handleToggleGroup(groupPermissions, checked as boolean)
-                                  }
-                                />
+                                {groupPermissions.map((permissionName) => {
+  const permissionData = permissions.find(p => p.name === permissionName);
+  if (!permissionData) return null;
+  
+  return (
+    <div key={permissionName} className="flex items-center space-x-2">
+      <Checkbox
+        id={permissionName}
+        checked={watchedPermissionIds.includes(permissionData.id)}
+        onCheckedChange={(checked) => 
+          handleTogglePermission(permissionName, checked as boolean)
+        }
+      />
+      <label 
+        htmlFor={permissionName}
+        className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+      >
+        {PERMISSION_LABEL[permissionName] || permissionName}
+      </label>
+    </div>
+  );
+})}
                                 <label 
                                   htmlFor={`group-${groupKey}`}
                                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
