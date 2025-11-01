@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { User } from "@/types/user";
 import { USER_STATUS_LABEL, ROLE_LABEL } from "@/lib/constants";
+import { getUserStats } from "@/lib/api"; // Importez la fonction API
 
 interface UserDetailsDialogProps {
   isOpen: boolean;
@@ -49,19 +50,9 @@ export function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogPr
 
       setIsLoadingStats(true);
       try {
-        // Remplacer par votre fonction API réelle
-        // const stats = await getUserStats(user.id);
-        // setUserStats(stats);
-
-        // Données de démonstration
-        setUserStats({
-          prospectsCreated: 12,
-          prospectsAssigned: 8,
-          formationsCreated: 3,
-          simulateursCreated: 2,
-          commentsCreated: 24,
-          interactionsCreated: 36
-        });
+        // Utilisez la fonction API pour récupérer les statistiques réelles
+        const stats = await getUserStats(user.id);
+        setUserStats(stats);
       } catch (error) {
         console.error("Erreur lors de la récupération des statistiques de l'utilisateur:", error);
       } finally {
@@ -74,6 +65,7 @@ export function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogPr
     }
   }, [isOpen, user]);
 
+  // Le reste du composant reste inchangé...
   const getInitials = (firstName?: string, lastName?: string) => {
     if (!firstName && !lastName) return "U";
     return `${firstName?.charAt(0) || ""}${lastName?.charAt(0) || ""}`.toUpperCase();
@@ -115,7 +107,7 @@ export function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogPr
             >
               <DialogHeader>
                 <DialogTitle className="text-xl" style={{ color: "#171717" }}>
-                  Détails de &apos;l&apos;utilisateur
+                  Détails de l&apos;utilisateur
                 </DialogTitle>
               </DialogHeader>
 
@@ -190,16 +182,15 @@ export function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogPr
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
-                      {user.role?.permissions && user.role.permissions.length > 0 ? (
-                        user.role.permissions.map((permission) => (
-                          <Badge key={permission.id} variant="outline">
-                            {permission.name}
-                          </Badge>
-                        ))
+                      {user.role?.id && user.role?.name ? (
+                        <Badge key={user.role.id} variant="outline">
+                          {user.role.name}
+                        </Badge>
                       ) : (
-                        <p className="text-gray-500">Aucune permission disponible</p>
+                        "Non spécifié"
                       )}
                     </div>
+
                   </CardContent>
                 </Card>
 

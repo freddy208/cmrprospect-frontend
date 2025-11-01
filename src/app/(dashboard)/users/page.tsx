@@ -30,7 +30,7 @@ interface UserStats {
 
 export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filters, setFilters] = useState<UserFilter>({});
+  const [filters, setFilters] = useState<UserFilter>({ status: "ACTIVE" });
   const [showFilters, setShowFilters] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -56,6 +56,7 @@ export default function UsersPage() {
     resetPassword,
     toggleStatus
   } = useUsers({ initialFilter: filters, autoFetch: true });
+
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -88,9 +89,10 @@ export default function UsersPage() {
     setFilters(prev => ({ ...prev, search: value }));
   };
 
-  const handleFilter = (newFilters: UserFilter) => {
-    setFilters(newFilters);
-  };
+const handleFilter = (newFilters: UserFilter) => {
+  setFilters(newFilters);
+  refetch(newFilters); // Ajoutez cette ligne
+};
 
   const handleCreateNew = () => {
     setSelectedUser(null);

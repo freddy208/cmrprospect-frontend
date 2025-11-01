@@ -29,15 +29,26 @@ import { useUsers } from "@/hooks/useUsers";
 import { useAuth } from "@/hooks/useAuth";
 import { USER_STATUS_LABEL, ROLE_LABEL } from "@/lib/constants";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
+import { getUserStats } from "@/lib/api"; // Import direct de la fonction API
+
+interface UserStats {
+  prospectsCreated: number;
+  prospectsAssigned: number;
+  formationsCreated: number;
+  simulateursCreated: number;
+  commentsCreated: number;
+  interactionsCreated: number;
+}
 
 export default function ProfilePage() {
   const params = useParams();
   const router = useRouter();
   const { user: currentUser } = useAuth();
-  const { getById, getStats } = useUsers();
+  const { getById } = useUsers(); // On ne récupère que getById
   const [user, setUser] = useState<any>(null);
-  const [userStats, setUserStats] = useState<any>(null);
+  const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingStats, setIsLoadingStats] = useState(false); // État de chargement pour les statistiques
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   useEffect(() => {
@@ -48,10 +59,6 @@ export default function ProfilePage() {
       try {
         const userData = await getById(params.id as string);
         setUser(userData);
-        
-        // Récupérer les statistiques de l'utilisateur
-        const stats = await getStats(params.id as string);
-        setUserStats(stats);
       } catch (error) {
         console.error("Erreur lors de la récupération des données de l'utilisateur:", error);
       } finally {
@@ -60,7 +67,26 @@ export default function ProfilePage() {
     };
 
     fetchUserData();
-  }, [params.id, getById, getStats]);
+  }, [params.id, getById]);
+
+  useEffect(() => {
+    const fetchUserStats = async () => {
+      if (!params.id) return;
+      
+      setIsLoadingStats(true);
+      try {
+        // Utilisation directe de l'API pour récupérer les statistiques
+        const stats = await getUserStats(params.id as string);
+        setUserStats(stats);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des statistiques de l'utilisateur:", error);
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+
+    fetchUserStats();
+  }, [params.id]);
 
   const getInitials = (firstName?: string, lastName?: string) => {
     if (!firstName && !lastName) return "U";
@@ -89,7 +115,7 @@ export default function ProfilePage() {
   };
 
   const handleEditProfile = () => {
-    router.push(`/profile/${params.id}/edit`);
+    router.push(`users/profile/${params.id}/edit`);
   };
 
   if (isLoading) {
@@ -213,11 +239,13 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {user.role.permissions.map((permission: any) => (
-                <Badge key={permission.id} variant="outline">
-                  {permission.name}
+              {user.role?.id && user.role?.name ? (
+                <Badge key={user.role.id} variant="outline">
+                  {user.role.name}
                 </Badge>
-              ))}
+              ) : (
+                "Non spécifié"
+              )}
             </div>
           </CardContent>
         </Card>
@@ -239,7 +267,11 @@ export default function ProfilePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {userStats ? (
+                {isLoadingStats ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                ) : userStats ? (
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
@@ -253,7 +285,7 @@ export default function ProfilePage() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm text-blue-600 font-medium">Prospects créés</p>
-                            <p className="text-2xl font-bold text-blue-900">{userStats.prospectsCreated || 0}</p>
+                            <p className="text-2xl font-bold text-blue-900">{userStats.prospectsCreated}</p>
                           </div>
                           <Users className="h-8 w-8 text-blue-600" />
                         </div>
@@ -262,7 +294,7 @@ export default function ProfilePage() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm text-green-600 font-medium">Prospects assignés</p>
-                            <p className="text-2xl font-bold text-green-900">{userStats.prospectsAssigned || 0}</p>
+                            <p className="text-2xl font-bold text-green-900">{userStats.prospectsAssigned}</p>
                           </div>
                           <Users className="h-8 w-8 text-green-600" />
                         </div>
@@ -271,7 +303,7 @@ export default function ProfilePage() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm text-purple-600 font-medium">Interactions</p>
-                            <p className="text-2xl font-bold text-purple-900">{userStats.interactionsCreated || 0}</p>
+                            <p className="text-2xl font-bold text-purple-900">{userStats.interactionsCreated}</p>
                           </div>
                           <Activity className="h-8 w-8 text-purple-600" />
                         </div>
@@ -296,13 +328,17 @@ export default function ProfilePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {userStats ? (
+                {isLoadingStats ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                ) : userStats ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="bg-blue-50 p-4 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-blue-600 font-medium">Prospects créés</p>
-                          <p className="text-2xl font-bold text-blue-900">{userStats.prospectsCreated || 0}</p>
+                          <p className="text-2xl font-bold text-blue-900">{userStats.prospectsCreated}</p>
                         </div>
                         <Users className="h-8 w-8 text-blue-600" />
                       </div>
@@ -311,7 +347,7 @@ export default function ProfilePage() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-green-600 font-medium">Prospects assignés</p>
-                          <p className="text-2xl font-bold text-green-900">{userStats.prospectsAssigned || 0}</p>
+                          <p className="text-2xl font-bold text-green-900">{userStats.prospectsAssigned}</p>
                         </div>
                         <Users className="h-8 w-8 text-green-600" />
                       </div>
@@ -335,13 +371,17 @@ export default function ProfilePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {userStats ? (
+                {isLoadingStats ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                ) : userStats ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-blue-50 p-4 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-blue-600 font-medium">Formations créées</p>
-                          <p className="text-2xl font-bold text-blue-900">{userStats.formationsCreated || 0}</p>
+                          <p className="text-2xl font-bold text-blue-900">{userStats.formationsCreated}</p>
                         </div>
                         <FileText className="h-8 w-8 text-blue-600" />
                       </div>
@@ -350,7 +390,7 @@ export default function ProfilePage() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-green-600 font-medium">Simulateurs créés</p>
-                          <p className="text-2xl font-bold text-green-900">{userStats.simulateursCreated || 0}</p>
+                          <p className="text-2xl font-bold text-green-900">{userStats.simulateursCreated}</p>
                         </div>
                         <FileText className="h-8 w-8 text-green-600" />
                       </div>
@@ -359,7 +399,7 @@ export default function ProfilePage() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-purple-600 font-medium">Commentaires</p>
-                          <p className="text-2xl font-bold text-purple-900">{userStats.commentsCreated || 0 }</p>
+                          <p className="text-2xl font-bold text-purple-900">{userStats.commentsCreated}</p>
                         </div>
                         <FileText className="h-8 w-8 text-purple-600" />
                       </div>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/hooks/useUsers.ts
 "use client";
@@ -48,25 +49,31 @@ export function useUsers({ initialFilter, autoFetch = true }: UseUsersOptions = 
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<UserFilter>(initialFilter || {});
 
-  const fetchUsers = useCallback(async (currentFilter: UserFilter) => {
-    if (!user) {
-      setError("Utilisateur non connecté");
-      setIsLoading(false);
-      return;
-    }
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await getUsers(currentFilter);
-      setUsers(data);
-    } catch (err: any) {
-      console.error("Erreur lors de la récupération des utilisateurs:", err);
-      setError(err?.response?.data?.message || "Une erreur est survenue.");
-      setUsers([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user]);
+const fetchUsers = useCallback(async (currentFilter: UserFilter) => {
+  if (!user) {
+    setError("Utilisateur non connecté");
+    setIsLoading(false);
+    return;
+  }
+  setIsLoading(true);
+  setError(null);
+  
+  // Nettoyer les filtres pour supprimer les valeurs vides
+  const cleanedFilter = Object.fromEntries(
+    Object.entries(currentFilter).filter(([_, value]) => value !== undefined && value !== "")
+  );
+  
+  try {
+    const data = await getUsers(cleanedFilter);
+    setUsers(data);
+  } catch (err: any) {
+    console.error("Erreur lors de la récupération des utilisateurs:", err);
+    setError(err?.response?.data?.message || "Une erreur est survenue.");
+    setUsers([]);
+  } finally {
+    setIsLoading(false);
+  }
+}, [user]);
 
   useEffect(() => {
     if (autoFetch) {
@@ -108,16 +115,17 @@ export function useUsers({ initialFilter, autoFetch = true }: UseUsersOptions = 
     }
   }, [user]);
 
-  const deleteUserHandler = useCallback(async (id: string): Promise<boolean> => {
-    try {
-      await deleteUser(id);
-      setUsers(prev => prev.filter(u => u.id !== id));
-      return true;
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Erreur lors de la suppression.");
-      return false;
-    }
-  }, []);
+const deleteUserHandler = useCallback(async (id: string): Promise<boolean> => {
+  try {
+    await deleteUser(id);
+    // Mettre à jour l'utilisateur localement pour éviter un rechargement
+    setUsers(prev => prev.map(u => u.id === id ? { ...u, status: 'DELETED', isActive: false } : u));
+    return true;
+  } catch (err: any) {
+    setError(err?.response?.data?.message || "Erreur lors de la suppression.");
+    return false;
+  }
+}, []);
 
   const getByIdHandler = useCallback(async (id: string): Promise<User | null> => {
     try {

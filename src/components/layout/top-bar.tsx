@@ -31,13 +31,13 @@ export function TopBar() {
 
   const handleViewProfile = () => {
     if (user?.id) {
-      router.push(`/profile/${user.id}`);
+      router.push(`users/profile/${user.id}`);
     }
   };
 
   const handleEditProfile = () => {
     if (user?.id) {
-      router.push(`/profile/${user.id}/edit`);
+      router.push(`users/profile/${user.id}/edit`);
     }
   };
 

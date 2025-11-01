@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// src/app/(dashboard)/layout.tsx
+// src/app/(dashboard)/administration/layout.tsx
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
@@ -10,7 +10,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { AdminProvider } from "@/hooks/useAdminContext";
 import { User } from "@/types/user";
 
-export default function DashboardLayout({
+export default function AdministrationLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -37,12 +37,14 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <TopBar />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+    <AdminProvider>
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <TopBar />
+          <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        </div>
       </div>
-    </div>
+    </AdminProvider>
   );
 }

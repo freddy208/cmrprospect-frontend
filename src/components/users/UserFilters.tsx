@@ -46,7 +46,7 @@ export function UserFilters({ filters, onFilter, currentUser, isOpen, onToggle }
   }, [countrySearch, sortedCountries]);
 
   const handleFilterChange = (key: string, value: string) => {
-    const newFilters = { ...localFilters, [key]: value };
+    const newFilters = { ...localFilters, [key]: value || undefined };
     setLocalFilters(newFilters);
     onFilter(newFilters);
   };
