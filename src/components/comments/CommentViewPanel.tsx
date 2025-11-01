@@ -61,7 +61,12 @@ export function CommentViewPanel({ prospectId, onBack }: CommentViewPanelProps) 
             </Button>
             <div>
               <h2 className="text-xl font-semibold" style={{ color: "#171717" }}>
-                {prospect ? `${prospect.firstName} ${prospect.lastName}` : "Chargement..."}
+                {prospect 
+                  ? prospect.type === "ENTREPRISE" 
+                    ? prospect.companyName 
+                    : `${prospect.firstName} ${prospect.lastName}`
+                  : "Chargement..."
+                }
               </h2>
               <p className="text-sm text-gray-500">{prospect?.email}</p>
             </div>
@@ -76,6 +81,7 @@ export function CommentViewPanel({ prospectId, onBack }: CommentViewPanelProps) 
           </Button>
         </div>
       </motion.div>
+
 
       {/* Liste des commentaires */}
       <div className="flex-1 overflow-y-auto p-4">

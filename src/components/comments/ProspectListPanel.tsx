@@ -64,26 +64,30 @@ export function ProspectListPanel({ onSelect, selectedId }: ProspectListPanelPro
             [...Array(5)].map((_, i) => <Skeleton key={i} className="h-16 w-full mb-2 rounded-md" />)
           ) : (
             filteredProspects.map((prospect) => (
-              <motion.div
-                key={prospect.id}
-                layoutId={`prospect-${prospect.id}`}
-                onClick={() => onSelect(prospect.id)}
-                className={cn(
-                  "p-3 mb-2 rounded-lg cursor-pointer transition-all duration-200 flex items-center space-x-3",
-                  selectedId === prospect.id ? "bg-blue-50 border-l-4" : "hover:bg-gray-100"
-                )}
-                style={{ borderLeftColor: selectedId === prospect.id ? "#1D4ED8" : "transparent" }}
+            <motion.div
+              key={prospect.id}
+              layoutId={`prospect-${prospect.id}`}
+              onClick={() => onSelect(prospect.id)}
+              className={cn(
+                "p-3 mb-2 rounded-lg cursor-pointer transition-all duration-200 flex items-center space-x-3",
+                selectedId === prospect.id ? "bg-blue-50 border-l-4" : "hover:bg-gray-100"
+              )}
+              style={{ borderLeftColor: selectedId === prospect.id ? "#1D4ED8" : "transparent" }}
+            >
+              <div
+                className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: "#EBF5FF" }}
               >
-                <div className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: "#EBF5FF" }}>
-                  <User className="h-5 w-5" style={{ color: "#1D4ED8" }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate" style={{ color: "#171717" }}>
-                    {prospect.firstName} {prospect.lastName}
-                  </p>
-                  <p className="text-xs text-gray-500 truncate">{prospect.email}</p>
-                </div>
-              </motion.div>
+                <User className="h-5 w-5" style={{ color: "#1D4ED8" }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate" style={{ color: "#171717" }}>
+                  {prospect.type === "ENTREPRISE" ? prospect.companyName : `${prospect.firstName} ${prospect.lastName}`}
+                </p>
+                <p className="text-xs text-gray-500 truncate">{prospect.email}</p>
+              </div>
+            </motion.div>
+
             ))
           )}
         </AnimatePresence>

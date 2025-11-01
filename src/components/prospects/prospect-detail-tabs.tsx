@@ -91,7 +91,7 @@ export function ProspectDetailTabs({ prospect }: ProspectDetailTabsProps) {
                   {prospect.whatsapp && (
                     <div className="flex items-center space-x-2">
                       <Phone className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm">WhatsApp: {prospect.whatsapp}</span>
+                      <span className="text-sm">WhatsApp: {prospect.whatsapp} </span>
                     </div>
                   )}
                   {prospect.country && (

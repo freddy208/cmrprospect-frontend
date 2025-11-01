@@ -50,28 +50,34 @@ export function InteractionViewPanel({ prospectId, onBack }: InteractionViewPane
   return (
     <div className="flex flex-col h-full">
       {/* En-tête */}
-      <motion.div 
-        layoutId={`prospect-${prospectId}`}
-        className="p-4 border-b border-gray-200 bg-white"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Button variant="ghost" size="icon" onClick={onBack} className="md:hidden">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h2 className="text-xl font-semibold" style={{ color: "#171717" }}>
-                {prospect ? `${prospect.firstName} ${prospect.lastName}` : "Chargement..."}
-              </h2>
-              <p className="text-sm text-gray-500">{prospect?.email}</p>
-            </div>
-          </div>
-          <Button onClick={handleCreateNew} className="flex items-center gap-2">
-            <PlusCircle className="h-4 w-4" />
-            Nouvelle interaction
+    <motion.div 
+      layoutId={`prospect-${prospectId}`}
+      className="p-4 border-b border-gray-200 bg-white"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <Button variant="ghost" size="icon" onClick={onBack} className="md:hidden">
+            <ArrowLeft className="h-5 w-5" />
           </Button>
+          <div>
+            <h2 className="text-xl font-semibold" style={{ color: "#171717" }}>
+              {prospect 
+                ? prospect.type === "ENTREPRISE"
+                  ? prospect.companyName
+                  : `${prospect.firstName} ${prospect.lastName}`
+                : "Chargement..."
+              }
+            </h2>
+            <p className="text-sm text-gray-500">{prospect?.email}</p>
+          </div>
         </div>
-      </motion.div>
+        <Button onClick={handleCreateNew} className="flex items-center gap-2">
+          <PlusCircle className="h-4 w-4" />
+          Nouvelle interaction
+        </Button>
+      </div>
+    </motion.div>
+
 
       {/* Liste des interactions */}
       <div className="flex-1 overflow-y-auto p-4">

@@ -195,93 +195,91 @@ const prospectsByStatusArray = Object.entries(stats.prospectsByStatus || {}).map
       {/* Autres sections */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* Graphique des prospects par statut */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-            <Card className="shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2" style={{ color: "#171717" }}>
-                  <PieChart className="h-5 w-5" style={{ color: "#1D4ED8" }} />
-                  Prospects par statut
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {prospectsByStatusArray.map((item, index) => {
-                    const percentage = totalProspectsByStatus > 0 
-                      ? Math.round((item.count / totalProspectsByStatus) * 100) 
-                      : 0;
-                    
-                    // Définir la couleur selon le statut
-                    const getStatusColor = (status: string) => {
-                      switch (status) {
-                        case 'NOUVEAU': return '#3B82F6'; // blue-500
-                        case 'QUALIFIE': return '#10B981'; // emerald-500
-                        case 'CONVERTI': return '#F59E0B'; // amber-500
-                        case 'PAS_SERIEUX': return '#6B7280'; // gray-500
-                        case 'PERDU': return '#EF4444'; // red-500
-                        default: return '#6B7280'; // gray-500
-                      }
-                    };
-                    
-                    // Ajout d'une description pour chaque statut
-                    const getStatusDescription = (status: string) => {
-                      switch (status) {
-                        case 'NOUVEAU': return 'Prospects récemment ajoutés';
-                        case 'QUALIFIE': return 'Prospects qualifiés et prêts pour la conversion';
-                        case 'CONVERTI': return 'Prospects devenus clients';
-                        case 'PAS_SERIEUX': return 'Prospects non intéressés ou non réactifs';
-                        case 'PERDU': return 'Prospects perdus durant le processus';
-                        default: return '';
-                      }
-                    };
-                    
-                    return (
-                      <div key={index} className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center gap-2">
-                            <div 
-                              className="w-3 h-3 rounded-full" 
-                              style={{ backgroundColor: getStatusColor(item.status) }}
-                            ></div>
-                            <span className="text-sm font-medium">{PROSPECT_STATUS_LABEL[item.status]}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-bold">{item.count}</span>
-                            <span className="text-xs text-gray-500">({percentage}%)</span>
-                          </div>
-                        </div>
-                        <p className="text-xs text-gray-500 ml-5">{getStatusDescription(item.status)}</p>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="h-2 rounded-full transition-all duration-500" 
-                            style={{ 
-                              width: `${percentage}%`,
-                              backgroundColor: getStatusColor(item.status)
-                            }}
-                          ></div>
-                        </div>
-                        {/* Ajout d'un bouton pour voir les détails *
-                        <div className="flex justify-end">
-                          <button 
-                            className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
-                            onClick={() => {
-                              // Implémenter la navigation vers la liste des prospects avec ce statut
-                              console.log(`Voir les prospects avec le statut: ${item.status}`);
-                            }}
-                          >
-                            Voir les détails
-                          </button>
-                        </div> */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <Card className="shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2" style={{ color: "#171717" }}>
+              <PieChart className="h-5 w-5" style={{ color: "#1D4ED8" }} />
+              Prospects par statut
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {prospectsByStatusArray.map((item, index) => {
+                const percentage = totalProspectsByStatus > 0 
+                  ? Math.round((item.count / totalProspectsByStatus) * 100) 
+                  : 0;
+                
+                const getStatusColor = (status: string) => {
+                  switch (status) {
+                    case 'NOUVEAU': return '#3B82F6'; // blue-500
+                    case 'QUALIFIE': return '#10B981'; // emerald-500
+                    case 'CONVERTI': return '#F59E0B'; // amber-500
+                    case 'PAS_SERIEUX': return '#6B7280'; // gray-500
+                    case 'PERDU': return '#EF4444'; // red-500
+                    default: return '#6B7280'; // gray-500
+                  }
+                };
+
+                const getStatusDescription = (status: string) => {
+                  switch (status) {
+                    case 'NOUVEAU': return 'Prospects récemment ajoutés';
+                    case 'QUALIFIE': return 'Prospects qualifiés et prêts pour la conversion';
+                    case 'CONVERTI': return 'Prospects devenus clients';
+                    case 'PAS_SERIEUX': return 'Prospects non intéressés ou non réactifs';
+                    case 'PERDU': return 'Prospects perdus durant le processus';
+                    default: return '';
+                  }
+                };
+
+                return (
+                  <div key={index} className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: getStatusColor(item.status) }}
+                        />
+                        <span className="text-sm font-medium">{PROSPECT_STATUS_LABEL[item.status]}</span>
                       </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-        </motion.div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold">{item.count}</span>
+                        <span className="text-xs text-gray-500">({percentage}%)</span>
+                      </div>
+                    </div>
+
+                    {/* Barre du graphique avec le nom du statut au-dessus */}
+                    <div className="relative">
+                      <p 
+                        className="absolute -top-5 text-xs font-semibold"
+                        style={{ color: getStatusColor(item.status) }}
+                      >
+                        {PROSPECT_STATUS_LABEL[item.status]}
+                      </p>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="h-2 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${percentage}%`,
+                            backgroundColor: getStatusColor(item.status)
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-gray-500 ml-5">{getStatusDescription(item.status)}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
 
         {/* Afficher la carte "Top Sales Officers" UNIQUEMENT pour DG et CM */}
         {(isDGStats(stats) || isCMStats(stats)) && (
@@ -374,7 +372,6 @@ const prospectsByStatusArray = Object.entries(stats.prospectsByStatus || {}).map
                             <Badge variant="outline" className="text-xs">
                               {manager.countryName || 'Non spécifié'}
                             </Badge>
-                            <p className="text-xs text-gray-500">Country Manager</p>
                           </div>
                         </div>
                       </div>
