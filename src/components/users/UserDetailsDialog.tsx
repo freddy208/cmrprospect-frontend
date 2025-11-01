@@ -117,7 +117,7 @@ export function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogPr
                 <DialogTitle className="text-xl" style={{ color: "#171717" }}>
                   Détails de &apos;l&apos;utilisateur
                 </DialogTitle>
-              </DialogHeader> `
+              </DialogHeader>
 
               <div className="space-y-6">
                 {/* Informations générales */}
@@ -142,7 +142,7 @@ export function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogPr
                         </h3>
                         <div className="flex flex-wrap gap-2">
                           <Badge variant="outline">
-                            {ROLE_LABEL[user.role.name] || user.role.name}
+                            {ROLE_LABEL[user.role?.name] || user.role?.name || "Non défini"}
                           </Badge>
                           <Badge className={getStatusColor(user.status)}>
                             {USER_STATUS_LABEL[user.status]}
@@ -175,9 +175,8 @@ export function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogPr
                         </div>
                       </div>
                     </div>
-                  </CardContent>
+                    </CardContent>
                 </Card>
-
                 {/* Permissions */}
                 <Card className="border-gray-200 shadow-sm">
                   <CardHeader>
@@ -191,11 +190,15 @@ export function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogPr
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
-                      {user.role.permissions.map((permission) => (
-                        <Badge key={permission.id} variant="outline">
-                          {permission.name}
-                        </Badge>
-                      ))}
+                      {user.role?.permissions && user.role.permissions.length > 0 ? (
+                        user.role.permissions.map((permission) => (
+                          <Badge key={permission.id} variant="outline">
+                            {permission.name}
+                          </Badge>
+                        ))
+                      ) : (
+                        <p className="text-gray-500">Aucune permission disponible</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -287,8 +290,8 @@ export function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogPr
                             <div className="bg-blue-50 p-4 rounded-lg">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="text-sm text-blue-600 font-medium">Prospects créés</p>
-                                  <p className="text-2xl font-bold text-blue-900">{userStats.prospectsCreated}</p>
+                                    <p className="text-sm text-blue-600 font-medium">Prospects créés</p>
+                                    <p className="text-2xl font-bold text-blue-900">{userStats.prospectsCreated}</p>
                                 </div>
                                 <Users className="h-8 w-8 text-blue-600" />
                               </div>
@@ -296,8 +299,8 @@ export function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogPr
                             <div className="bg-green-50 p-4 rounded-lg">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="text-sm text-green-600 font-medium">Prospects assignés</p>
-                                  <p className="text-2xl font-bold text-green-900">{userStats.prospectsAssigned}</p>
+                                    <p className="text-sm text-green-600 font-medium">Prospects assignés</p>
+                                    <p className="text-2xl font-bold text-green-900">{userStats.prospectsAssigned}</p>
                                 </div>
                                 <UserCheck className="h-8 w-8 text-green-600" />
                               </div>
@@ -330,8 +333,8 @@ export function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogPr
                             <div className="bg-blue-50 p-4 rounded-lg">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="text-sm text-blue-600 font-medium">Formations créées</p>
-                                  <p className="text-2xl font-bold text-blue-900">{userStats.formationsCreated}</p>
+                                    <p className="text-sm text-blue-600 font-medium">Formations créées</p>
+                                    <p className="text-2xl font-bold text-blue-900">{userStats.formationsCreated}</p>
                                 </div>
                                 <FileText className="h-8 w-8 text-blue-600" />
                               </div>
@@ -339,8 +342,8 @@ export function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogPr
                             <div className="bg-green-50 p-4 rounded-lg">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="text-sm text-green-600 font-medium">Simulateurs créés</p>
-                                  <p className="text-2xl font-bold text-green-900">{userStats.simulateursCreated}</p>
+                                    <p className="text-sm text-green-600 font-medium">Simulateurs créés</p>
+                                    <p className="text-2xl font-bold text-green-900">{userStats.simulateursCreated}</p>
                                 </div>
                                 <FileText className="h-8 w-8 text-green-600" />
                               </div>
@@ -348,8 +351,8 @@ export function UserDetailsDialog({ isOpen, onClose, user }: UserDetailsDialogPr
                             <div className="bg-purple-50 p-4 rounded-lg">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="text-sm text-purple-600 font-medium">Commentaires</p>
-                                  <p className="text-2xl font-bold text-purple-900">{userStats.commentsCreated}</p>
+                                    <p className="text-sm text-purple-600 font-medium">Commentaires</p>
+                                    <p className="text-2xl font-bold text-purple-900">{userStats.commentsCreated}</p>
                                 </div>
                                 <FileText className="h-8 w-8 text-purple-600" />
                               </div>

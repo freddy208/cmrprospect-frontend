@@ -42,7 +42,6 @@ export type UpdateUserData = Partial<Omit<CreateUserData, 'password'>> & {
   status?: 'ACTIVE' | 'INACTIVE' | 'DELETED';
 };
 
-// src/types/user.ts
 export type UserFilter = {
   search?: string;
   roleId?: string;

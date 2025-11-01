@@ -622,11 +622,12 @@ export async function getPermissions(filter?: PermissionFilter) {
 // --- NOUVELLES FONCTIONS POUR LE MODULE UTILISATEUR ---
 
 // src/lib/api.ts
+// src/lib/api.ts
 export async function getUsers(filter?: UserFilter) {
   const params = new URLSearchParams();
   if (filter) {
     Object.entries(filter).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
+      if (value !== undefined && value !== null && value !== "") {
         params.append(key, String(value));
       }
     });
@@ -637,9 +638,15 @@ export async function getUsers(filter?: UserFilter) {
   return response.data;
 }
 
+// src/lib/api.ts
 export async function getUser(id: string) {
-  const response = await api.get<User>(`/users/${id}`);
-  return response.data;
+  try {
+    const response = await api.get<User>(`/users/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de la récupération de l'utilisateur:", error);
+    throw error;
+  }
 }
 
 export async function createUser(data: CreateUserData) {

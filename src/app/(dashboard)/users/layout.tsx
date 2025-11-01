@@ -7,8 +7,6 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { TopBar } from "@/components/layout/top-bar";
 import { Sidebar } from "@/components/layout/sidebar";
-import { AdminProvider } from "@/hooks/useAdminContext";
-import { User } from "@/types/user";
 
 export default function DashboardLayout({
   children,
